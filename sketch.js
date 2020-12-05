@@ -49,8 +49,6 @@ var _floor, counter, wall1, wall2, wall3, wall4, wall5, wall6
 var stove, shelf
 var plant1, basket1, basket2,basket3
 
-
-
 //****************Cutting board
 var board_stack = 0.9
 var selected_items
@@ -67,17 +65,29 @@ var container_holding_item
 var holding = false		   	// is there an item in our hands?
 var clicked = false
 
+// ************* UI
+var selectionUI, clearSelectionBtn
+var selected_items 					// user's current selection
+var selected_items_name
+var save_items, save_items_name
+var clearSelectionBtn, selectionUI
+// var clearSelection = false
+var warning, warning_msg
+
 // variable for specific tools
 var knife_clicked = false
 
 // complete order
 var food_in_plate = []
 var food_in_plate_name = []
+var plate_clicked = false
 
 var iscorrect_food = false
 
 
 
+// ****************************** SETUP() ******************************
+// ---------------------------------------------------------------------
 function setup() {
 	noCanvas();
 	world = new World('VRScene');
@@ -165,18 +175,19 @@ function setup() {
 	//************************ Hold Item Show box
 	holdingitem_show_box = new Plane({
 		x:0,y:0.5,z:0,
-		width:0.2,
+		width:0.2, 
+		opacity: 0, 			//temporarily hide it first
 		height:0.2
 	})
 	remaining_time = int(random(15,30))
 
 	score_holder = new Plane({
 		x:0,y:0.7,z:0,
-		red:186,green:255,blue:201,
-		width:1,
-		height:0.2
+		red:185,green:190,blue:195,
+		width:0.5,
+		height:0.2, opacity: 0.8
 	})
-	score_holder.tag.setAttribute('text','value: Score: ' +score+  '\n Remaining Time: '+remaining_time+' ; color: rgb(0,0,0); align: center;');
+	score_holder.tag.setAttribute('text','value: Score: ' +score+  '\n Remaining Time: '+remaining_time+' ; color: rgb(0,0,0); align: center; height: 1; width:1;');
 
 	world.camera.cursor.addChild(holdingitem_show_box);
 	world.camera.cursor.addChild(score_holder);
@@ -209,9 +220,12 @@ function setup() {
 	customer_order_list = ["Steak","Noodle","Sandwitch"]
 	 set_random_customer_order()
 
+
+
+
 	//  ******** SETTING ********
 		// FLOOR
-		var _floor = new Plane({
+		_floor = new Plane({
 			x:0, y:0, z:0,
 			width:20, height:30,
 			red:120, green:120, blue:120,
@@ -224,7 +238,7 @@ function setup() {
 
 
 	//  ******** COUNTER ********
-		var counter = new Ring({
+		counter = new Ring({
 			x:0, y:0.9, z:5,
 			radiusInner: 0.35,
 			radiusOuter: 2,
@@ -234,12 +248,13 @@ function setup() {
 		})
 		world.add(counter);
 		//Counter walls: 		x,		z,		rotateY
-		var wall1 = new Walls (0,		4.646,	0)
-		var wall2 = new Walls (-0.339,	4.803,	50)
-		var wall3 = new Walls (-0.359,	5.156,	125)
-		var wall4 = new Walls (0,		5.353,	180)
-		var wall5 = new Walls (0.326,	4.803,	-50)
-		var wall6 = new Walls (0.326,	5.156,	-125)
+		wall1 = new Walls (0,		4.646,	0)
+		wall2 = new Walls (-0.339,	4.803,	50)
+		 wall3 = new Walls (-0.359,	5.156,	125)
+		 wall4 = new Walls (0,		5.353,	180)
+		 wall5 = new Walls (0.326,	4.803,	-50)
+		 wall6 = new Walls (0.326,	5.156,	-125)
+
 
 
 	// ******** SERVING AREA ********
@@ -249,11 +264,19 @@ function setup() {
 		// 	x:0.85, y:0.94, z:5.13,
 		// 	scaleX:1.5, scaleY:1.5, scaleZ:1.5
 		// })
-		var plate = new Interactables('dish_obj','dish_mtl',0.85,0.94,5.13,1.5,1.5,1.5,0,0,0,0.85,0.94,5.13,0,0,0,0.5,'plate')
+		plate = new Interactables('dish_obj','dish_mtl',	0.85, 0.94, 5.13,	1.5,1.5,1.5,	0,0,0,	0.5,0.3,0.5,	'plate')
 		//world.add(plate)
 
+		// mat
+		// var mat = new Plane ({
+		// 	x:0.87, y:0.91, z:5.13,
+		// 	width:0.8, height:1,
+		// 	rotationX:-90, rotationZ:0,
+		// 	asset: "servingMat"
+		// })
+		// world.add(mat)
 
-		var blanket = new Plane ({
+		blanket = new Plane ({
 			x:-0.92, y:0.91, z:4.13,
 			width:0.8, height:1,
 			rotationX:-90, rotationY:-30,
@@ -269,8 +292,11 @@ function setup() {
 		//var fridgeDoorClosed = new Objects('fridgeDoor_obj', 'fridgeDoor_mtl', -0.15, 1.34, 5.74, 1,1,1, 0,220,0)
 		//var fridgeDoorOpen = new Objects('fridgeDoor_obj', 'fridgeDoor_mtl', 0.403, 1.34, 5.55, 1,1,1, 0,80,0)
 		fridge = new Fridge()
+
+
+
 	// ******** COOKING AREA ********
-		var stove = new Box({
+		stove = new Box({
 			x:-0.93, y:0.91, z:5.28,
 			width:1, height:0.76, depth:0.03,
 			rotationX:-90, rotationY:100,
@@ -282,12 +308,12 @@ function setup() {
 		world.add(stove)
 
 		pot = new Objects('pot_obj','pot_mtl',-0.95,0.94,5.04,0.008,0.01,0.008,0,300,0,"pot")
-		var pan = new Objects('pan_obj','pan_mtl',-0.66,1,5.49,1,1,1,0,270,0,"pan")
+		pan = new Objects('pan_obj','pan_mtl',-0.66,1,5.49,1,1,1,0,270,0,"pan")
 
 
 	//  ******** PREPARATION AREA ********
 		// cutting board: interactable
-		var cuttingBoard = new Box ({
+		cuttingBoard = new Box ({
 
 			x:0, y:0.91, z:4.23,
 			width:1.21, height:0.9, depth:0.03,
@@ -310,31 +336,7 @@ function setup() {
 					}
 					let items_on_board = selected_items_name
 
-					// add a hitbox for whatever items on cutting board
-					// let hitbox = new Plane ({
-					// 	x: 0,
-					// 	y: 1.1,
-					// 	z: 4.4,
-					// 	rotationX: 0,
-					// 	rotationY: 0,
-					// 	rotationZ:0,
-					// 	scaleX: 0.4,
-					// 	scaleY: 0.4,
-					// 	scaleZ: 0.4,
-					//
-					// 	red:255,
-					// 	opacity: 0.8,
-					// 	clickFunction: function(theBox){
-					// 		// did user select a knife
-					// 		if(knife_clicked){
-					// 			// swap the asset with sliced product
-					// 		//	console.log("You have ",items_on_board)
-					// 			console.log("display a sliced product")
-					//
-					// 		}
-					//
-					// 	}
-					// })
+				
 
 					//world.add(hitbox)
 					console.log("cutting board was clicked!")
@@ -345,21 +347,25 @@ function setup() {
 		})
 		world.add(cuttingBoard)
 
-		knife = new Interactables('knife_obj','knife_mtl',	0.378, 0.84,4.35,	0.0015,0.0015,0.0015,	90,90,0,	0.39, 0.95,4.25,90,0,0,0.4, "knife")
+		
+
+
+		knife = new Interactables('knife_obj','knife_mtl',	0.378, 0.84,4.35,	0.0015,0.0015,0.0015,	90,90,0,	0.25,0.2,0.42, "knife")
 
 
 	// ******** SPICE SHELF ********
 		// spice shelf
-		var shelf = new Objects('shelf_obj','shelf_mtl',0,0.84,3.64,0.99,0.63,0.72,0,0,0,"shelf")
-		var ketchup = new Objects('ketchup_obj','ketchup_mtl',-0.51,1,4.17,0.0003,0.0003,0.0003,0,60,0,"ketchup")
-		var trashCan =  new Objects('trashCan_obj','trashCan_mtl',0.28,0.112,4.979,0.002,0.002,0.002,0,0,0,"trashCan")
-		var hotSauce =  new Objects('hotSauce_obj','hotSauce_mtl',-0.22,1.18,3.75,0.3,0.3,0.3,0,180,0,"hotSauce")
+		 shelf = new Objects('shelf_obj','shelf_mtl',0,0.84,3.64,0.99,0.63,0.72,0,0,0,"shelf")
+		 ketchup = new Objects('ketchup_obj','ketchup_mtl',-0.51,1,4.17,0.0003,0.0003,0.0003,0,60,0,"ketchup")
+		 trashCan =  new Objects('trashCan_obj','trashCan_mtl',0.28,0.112,4.979,0.002,0.002,0.002,0,0,0,"trashCan")
+		 hotSauce =  new Objects('hotSauce_obj','hotSauce_mtl',-0.22,1.18,3.75,0.3,0.3,0.3,0,180,0,"hotSauce")
 
-		// ingrediants
-		var bread= new Interactables('bread_obj','bread_mtl',		-1.13,1,4.276,	1,1,1,	-80,30,0,	-1.13,1,4.276,	-80,30,0,0.3,	"bread")
-		// 	_asset,		_mtl,			x,	y,	z,		sX,sY,sZ,_rotationX,_rotationY,_rotationZ,	hitboxX,hitboxY,hitboxZ, hitRotationX, hitRotationY, hitRotationZ, hitBozScale,_name
-		var tomato= new Interactables('tomato_obj','tomato_mtl',	-0.5,1.45,3.64,	0.005,0.005,0.005,	-90,0,0,  -0.5,1.47,3.78,0,0,0,0.3,	"tomato")
-		var cheese = new Box({
+		
+		 // ingrediants
+		bread= new Interactables('bread_obj','bread_mtl',		-1.13,1,4.276,	1,1,1,				-80,30,0,	0.3,0.07,0.28,	"bread")
+		tomato= new Interactables('tomato_obj','tomato_mtl',	-0.5,1.45,3.64,	0.005,0.005,0.005,	-90,0,0, 0.3,0.3,0.3,	"tomato")
+		
+		cheese = new Box({
 			x:0.072, y:1.387, z:5.97,
 			width:0.1,	height:0.08, depth: 0.13,
 			red:244, green:208, blue:63,
@@ -391,6 +397,9 @@ function setup() {
 		})
 		world.add(cheese)
 
+		ingredients.push('tomato', 'cheese')
+
+
 		//var steak= new Interactables('steak_raw_obj','steak_raw_mtl',	1,2,1,	0.005,0.005,0.005,	-90,0,0,  -0.5,1.47,3.78,0,0,0,0.3,	"tomato")
 		var steak_raw = new OBJ({
 			asset:'steak_obj',
@@ -404,7 +413,7 @@ function setup() {
 		world.add(steak_raw)
 
 		// ******** DECORATIONS ********
-		var plant1 = new Objects('plant1_obj','plant1_mtl',		1.26,0.88,4.24,		0.1,0.1,0.1,	0,0,0)
+		plant1 = new Objects('plant1_obj','plant1_mtl',		1.26,0.88,4.24,		0.1,0.1,0.1,	0,0,0)
 		//
 		// var basket1 = new Objects('basket_obj','basket_mtl',	-0.86,1,4.48,		0.5,0.5,0.5,	0,0,0)
 		// var basket2 = new Objects('basket_obj','basket_mtl',	-0.72,1,4.27,		0.5,0.5,0.5,	0,0,0)
@@ -439,6 +448,47 @@ function setup() {
 
 			world.camera.holder.appendChild(holdingitem.tag);
 	}
+
+	// ****************************** UI ******************************
+		// clear selection button
+		clearSelectionBtn = new Plane({
+			x:0.6, y:0.56, z:-0.8,
+			red:185,green:190,blue:195, opacity: 0.8,
+			width:0.45, height:0.08,
+			clickFunction: function(thePlane){
+				// console.log("Clear Selection!")
+			
+				// if(knife_clicked){
+				// 	knife_clicked = false
+				// 	knifeMovement()
+				// }			
+				// else{
+				// 	selected_items = undefined
+				// 	selected_items_name = undefined
+				// }
+
+			}
+		})
+		clearSelectionBtn.tag.setAttribute('text','value: Clear Selection ; color: rgb(0,0,0); align:center; height: 1; width:1;')
+
+	
+	
+		// show user's current selection 
+		selectionUI = new Plane ({
+			x:0, y:0.4, z:-0.8,
+			red:185,green:190,blue:195, opacity: 0.8,
+			width:0.7, height:0.1
+		})
+		selectionUI.tag.setAttribute('text','value: You have not selected anything; color: rgb(0,0,0); align:center; height: 1; width:1;')
+
+		// add Btns to the HUD
+		selectionUI.tag.setAttribute('cursor','rayOrigin: mouse')		
+		world.camera.holder.appendChild(selectionUI.tag);
+		world.camera.holder.appendChild(clearSelectionBtn.tag);
+
+
+
+
 }
 
 
@@ -462,6 +512,14 @@ function draw() {
 			score -= 1
 			score_holder.tag.setAttribute('text','value: Score: ' +score+  '\n Remaining Time: '+remaining_time+' ; color: rgb(0,0,0); align: center;');
 		}
+	}
+
+
+	// update selection UI
+	if(selected_items_name == undefined ){
+		selectionUI.tag.setAttribute('text','value: You have not selected anything; color: rgb(0,0,0); align:center; height: 1; width:1;')
+	}else{
+		selectionUI.tag.setAttribute('text','value: You selected : '+ selected_items_name + ';  color: rgb(0,0,0); align:center; height: 1; width:1;')
 	}
 
 }
@@ -648,7 +706,7 @@ class Objects {
 
 // interactable objs
 class Interactables {
-	constructor(_asset,_mtl,x,y,z,sX,sY,sZ,_rotationX,_rotationY,_rotationZ,hitboxX,hitboxY,hitboxZ, hitRotationX, hitRotationY, hitRotationZ, hitBozScale,_name){
+	constructor(_asset,_mtl,	x,y,z,	sX,sY,sZ,	_rotationX,_rotationY,_rotationZ,	hitBozScaleX,hitBozScaleY,hitBozScaleZ,	_name){
 		this.container = new Container3D({
 			// blank
 		})
@@ -667,17 +725,14 @@ class Interactables {
 		this.container.add(this.utensil)
 
 		this.hitbox = new Box({
-			x: hitboxX,
-			y: hitboxY,
-			z: hitboxZ,
-			rotationX: hitRotationX,
-			rotationY: hitRotationY,
-			rotationZ:hitRotationZ,
-			scaleX: hitBozScale,
-			scaleY: hitBozScale,
-			scaleZ: hitBozScale,
+			x: x,
+			y: y,
+			z: z,
+			scaleX: hitBozScaleX,
+			scaleY: hitBozScaleY,
+			scaleZ: hitBozScaleZ,
 
-
+			red:255,
 			opacity: 0.8,
 
 
@@ -755,24 +810,6 @@ class Interactables {
 		})
 
 		this.container.add(this.hitbox)
-
-
-		this.checkmark = new Plane({
-			x: hitboxX,
-			y: hitboxY,
-			z: hitboxZ,
-			rotationX: hitRotationX,
-			rotationY: hitRotationY,
-			rotationZ:hitRotationZ,
-			scaleX: hitBozScale,
-			scaleY: hitBozScale,
-			scaleZ: hitBozScale,
-			transparent: true,
-			asset:'selected'
-		})
-		// this.container.add(this.checkmark)
-
-
 		world.add(this.container)
 
 
