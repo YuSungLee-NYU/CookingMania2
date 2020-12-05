@@ -33,6 +33,9 @@ var selected_items
 var selected_items_name
 var cutting_board_item = []
 
+//********************* pan
+var pan_item = []
+
 //************* Action field
 var interactable_obj = []	// list of items that users can interact with
 // var selected_items = []
@@ -178,7 +181,8 @@ function setup() {
 	current_customer = random(customers_list);
 	current_customer.add_to_world()
 
-	customer_order_list = ["Steak","Noodle","Sandwitch"]
+	//,"Sandwitch"
+	customer_order_list = ["Steak", "Hamburger","Sandwitch"]
 	 set_random_customer_order()
 
 	//  ******** SETTING ********
@@ -254,7 +258,7 @@ function setup() {
 		world.add(stove)
 
 		pot = new Objects('pot_obj','pot_mtl',-0.95,0.94,5.04,0.008,0.01,0.008,0,300,0,"pot")
-		var pan = new Objects('pan_obj','pan_mtl',-0.66,1,5.49,1,1,1,0,270,0,"pan")
+		var pan = new Interactables('pan_obj','pan_mtl', -0.66,1,5.49,1,1,1,0,270,0,-0.75,1,5.49,0,270,0,0.25,"pan")
 
 
 	//  ******** PREPARATION AREA ********
@@ -269,56 +273,28 @@ function setup() {
 			clickFunction: function(theBox) {
 
 				// if user has selected sth
-				if(holding){
-					board_stack += 0.05;
-					selected_items.setPosition(0,board_stack,4.2)
+				if(customer_order == "Sandwitch"){
 
-					// put the selected item in the middle of the cutting board
-					if(!knife_clicked){
+					if(holding){
+						board_stack += 0.05;
+						selected_items.setPosition(0,board_stack,4.2)
+
+						// put the selected item in the middle of the cutting board
 						cutting_board_item.push(selected_items);
 						food_in_plate.push(selected_items_name);
 						world.add(selected_items)
 						holding = false;
+						holdingitem_show_box.setAsset("")
+						let items_on_board = selected_items_name
+
+						console.log("cutting board was clicked!")
 					}
-					let items_on_board = selected_items_name
-
-					// add a hitbox for whatever items on cutting board
-					// let hitbox = new Plane ({
-					// 	x: 0,
-					// 	y: 1.1,
-					// 	z: 4.4,
-					// 	rotationX: 0,
-					// 	rotationY: 0,
-					// 	rotationZ:0,
-					// 	scaleX: 0.4,
-					// 	scaleY: 0.4,
-					// 	scaleZ: 0.4,
-					//
-					// 	red:255,
-					// 	opacity: 0.8,
-					// 	clickFunction: function(theBox){
-					// 		// did user select a knife
-					// 		if(knife_clicked){
-					// 			// swap the asset with sliced product
-					// 		//	console.log("You have ",items_on_board)
-					// 			console.log("display a sliced product")
-					//
-					// 		}
-					//
-					// 	}
-					// })
-
-					//world.add(hitbox)
-					console.log("cutting board was clicked!")
 				}
 				console.log("cutting board was clicked!")
 			}
 
 		})
 		world.add(cuttingBoard)
-
-		knife = new Interactables('knife_obj','knife_mtl',	0.378, 0.84,4.35,	0.0015,0.0015,0.0015,	90,90,0,	0.39, 0.95,4.25,90,0,0,0.4, "knife")
-
 
 	// ******** SPICE SHELF ********
 		// spice shelf
@@ -363,17 +339,8 @@ function setup() {
 		})
 		world.add(cheese)
 
-		//var steak= new Interactables('steak_raw_obj','steak_raw_mtl',	1,2,1,	0.005,0.005,0.005,	-90,0,0,  -0.5,1.47,3.78,0,0,0,0.3,	"tomato")
-		var steak_raw = new OBJ({
-			asset:'steak_obj',
-			mtl:'steak_mtl',
-			x:0, y:1.5,z:1.5,
-			red:255,green:0,blue:0,
-			scaleX:1,
-			scaleY:1,
-			scaleZ:1,
-		})
-		world.add(steak_raw)
+		var steak = new Interactables('steak_obj','steak_mtl',	0,1.187,5.97,	0.1,0.1,0.1,	-0,0,0,  0,1.187,5.97,0,0,0,0.2,	"steak")
+		var aspara = new Interactables('aspara_obj','aspara_mtl',	-0.2,1.387,5.97,	0.07,0.07,0.07,	-0,-60,0, -0.2,1.387,5.97,0,0,0,0.2,	"aspara")
 
 		// ******** DECORATIONS ********
 		var plant1 = new Objects('plant1_obj','plant1_mtl',		1.26,0.88,4.24,		0.1,0.1,0.1,	0,0,0)
@@ -446,7 +413,7 @@ function set_random_customer_order(){
 	customer_order = random(customer_order_list);
 
 	if(customer_order == "Steak"){
-		recipe_detail = "The Customer wants a Steak"
+		recipe_detail = "The Customer wants a Steak \n\n Pick a steak \n Click the pan \n pick a asparagus \n Click the pan \n Click the Plate \n Click Give"
 
 	}
 	else if(customer_order == "Noodle"){
@@ -459,34 +426,87 @@ function set_random_customer_order(){
 }
 function check_recipe(){
 	if(customer_order == "Steak"){
+		if(food_in_plate[0] == "steak")
+			if(food_in_plate[1] == "aspara"){
+				//success
+				food_in_plate = []
+				for(let i = 0; i < pan_item.length; i++){
+					world.remove( pan_item[i])
+				}
+				pan_item = []
+				iscorrect_food = true
+				console.log("GOOD JOB");
+				score += remaining_time * 3
+
+				score_holder.tag.setAttribute('text','value: Score: ' +score+  '\n Remaining Time: '+remaining_time+' ; color: rgb(0,0,0); align: center;');
+
+			}
+			else{
+				//fail
+				food_in_plate = []
+				for(let i = 0; i < pan_item.length; i++){
+					world.remove( pan_item[i])
+				}
+				pan_item = []
+				iscorrect_food = false
+				score -= 1
+				score_holder.tag.setAttribute('text','value: Score: ' +score+  '\n Remaining Time: '+remaining_time+' ; color: rgb(0,0,0); align: center;');
+
+			}
+		else if(food_in_plate[0] == "aspara"){
+			if(food_in_plate[1] == "steak"){
+				//success
+				food_in_plate = []
+				for(let i = 0; i < pan_item.length; i++){
+					world.remove( pan_item[i])
+				}
+				pan_item = []
+				iscorrect_food = true
+				console.log("GOOD JOB");
+				score += remaining_time * 3
+
+				score_holder.tag.setAttribute('text','value: Score: ' +score+  '\n Remaining Time: '+remaining_time+' ; color: rgb(0,0,0); align: center;');
+			}
+			else{
+				food_in_plate = []
+				for(let i = 0; i < pan_item.length; i++){
+					world.remove( pan_item[i])
+				}
+				pan_item = []
+				iscorrect_food = false
+				score -= 1
+				score_holder.tag.setAttribute('text','value: Score: ' +score+  '\n Remaining Time: '+remaining_time+' ; color: rgb(0,0,0); align: center;');
+
+			}
+
+	}
 
 	}
 	else if(customer_order == "Sandwitch"){
-		if(food_in_plate[0] != "bread" && food_in_plate[1] != "tomato" && food_in_plate[2] != "cheese", food_in_plate[3] != "bread"){
+		console.log(food_in_plate);
+		if(food_in_plate[0] == "bread" && food_in_plate[1] == "tomato" && food_in_plate[2] == "cheese" && food_in_plate[3] == "bread"){
 
+				score += remaining_time * 3
+				food_in_plate = []
+				for(let i = 0; i < cutting_board_item.length; i++){
+					world.remove( cutting_board_item[i])
+				}
+				cutting_board_item = []
+				iscorrect_food = true
+				console.log("GOOD JOB");
+				score_holder.tag.setAttribute('text','value: Score: ' +score+  '\n Remaining Time: '+remaining_time+' ; color: rgb(0,0,0); align: center;');
+
+
+		}
+		else{
 			food_in_plate = []
 			for(let i = 0; i < cutting_board_item.length; i++){
 				world.remove( cutting_board_item[i])
 			}
 			cutting_board_item = []
-			console.log(food_in_plate);
-			console.log(cutting_board_item);
-			console.log("wrong food");
 			iscorrect_food = false
 			score -= 1
 			score_holder.tag.setAttribute('text','value: Score: ' +score+  '\n Remaining Time: '+remaining_time+' ; color: rgb(0,0,0); align: center;');
-		}
-		else{
-			score += remaining_time * 3
-			food_in_plate = []
-			for(let i = 0; i < cutting_board_item.length; i++){
-				world.remove( cutting_board_item[i])
-			}
-			cutting_board_item = []
-			iscorrect_food = true
-			console.log("GOOD JOB");
-			score_holder.tag.setAttribute('text','value: Score: ' +score+  '\n Remaining Time: '+remaining_time+' ; color: rgb(0,0,0); align: center;');
-
 		}
 	}
 	else if(customer_order == "Noodle"){
@@ -678,8 +698,63 @@ class Interactables {
 			clickFunction: function(theBox){
 				selected_items_name = _name
 
-				if(selected_items_name != 'plate'){
+				if(selected_items_name == 'plate'){
+					console.log("PLATE!");
+					if(customer_order == "Sandwitch"){
 
+						board_stack = 0.9
+						for(let i = 0; i < cutting_board_item.length; i++){
+							cutting_board_item[i].setPosition(x,y+(0.05*i),z)
+						}
+					}
+					else if(customer_order == "Steak"){
+						console.log("STEAK!");
+
+						for(let i = 0; i < pan_item.length; i++){
+							console.log(food_in_plate[i]);
+							if(food_in_plate[i] == "steak"){
+								pan_item[i].setScale(0.2,0.2,0.2)
+								pan_item[i].setPosition(x,y,z)
+							}
+							else{
+								pan_item[i].setScale(0.1,0.1,0.1)
+								pan_item[i].setPosition(x,y+0.1,z)
+
+							}
+						}
+					}
+				}
+				if(selected_items_name == 'pan'){
+					if(holding && pan_item.length <= 2){
+						console.log(selected_items_name);
+						if(customer_order == "Steak"){
+							if(holdingitem_show_box.getAsset() == "steak_hold"){
+
+								selected_items.setScale(0.055,0.055,0.055)
+								food_in_plate.push("steak")
+
+							}
+							else if(holdingitem_show_box.getAsset() == "aspara_hold"){
+								food_in_plate.push("aspara")
+
+								selected_items.setScale(0.04,0.04,0.04)
+							}
+							if(pan_item.length == 1){
+								selected_items.setPosition(-0.85,1,5.55)
+							}
+							else{
+								selected_items.setPosition(-0.95,1,5.55)
+
+							}
+							world.add(selected_items)
+							holding = false;
+							holdingitem_show_box.setAsset("")
+							log(selected_items.getWorldPosition())
+							pan_item.push(selected_items)
+						}
+					}
+				}
+				else{
 					// the user has seleted an item
 					if(holding == false){
 						holding = true
@@ -702,6 +777,12 @@ class Interactables {
 						else {
 							if(selected_items_name == "bread"){
 								holdingitem_show_box.setAsset("bread_hold")
+							}
+							else if(selected_items_name == "steak"){
+								holdingitem_show_box.setAsset("steak_hold")
+							}
+							else if(selected_items_name == "aspara"){
+								holdingitem_show_box.setAsset("aspara_hold")
 							}
 							selected_items = new OBJ({asset:_asset,
 								mtl: _mtl,
@@ -738,12 +819,6 @@ class Interactables {
 					console.log("holding is " + holding)
 					console.log(selected_items_name + " was clicked!")
 					// console.log(selected_items)
-				}
-				else{
-					board_stack = 0.9
-					for(let i = 0; i < cutting_board_item.length; i++){
-						cutting_board_item[i].setPosition(x,y+(0.05*i),z)
-					}
 				}
 			}
 		})
