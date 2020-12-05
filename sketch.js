@@ -1,4 +1,6 @@
-// HELLO
+// PROBLEMS THAT STILL NEEDS TO BE RESOLVED:
+// - 
+// -
 
 var world
 var camX = 0
@@ -9,6 +11,8 @@ var remaining_time = 10
 var score_holder
 
 //*************HUD field
+var recipe_container = ["tomato slice","lettuce shred","bread","beef"]		//temporary recipe holder for test
+
 var recipe_container, recipe_show_button, recipe_textholder
 var recipe_opened_container,recipe_close_button,recipe_close_textholder
 var recipe_detail
@@ -23,10 +27,30 @@ var customer_order, current_customer
 var customer_order_list = []
 var customer_hitbox;
 
-//***************Interactable Objects
-var pot
-var knife
-var fridge
+
+//*************** Interactable Objects 1: objects that implement actions
+var pot, pan, knife, fridge
+var ketchup, hotSauce
+
+// *************** Interactable Objects 2: ingredients (objects that can have actions implemented on)
+var tomato, tomato_slice, cheese, bread
+var ingredients = []				// array of objects that actions can implement on; 
+									// this should only be those that can be displayed on cutting board
+
+//*************** Interactable Objects 3: objects that action will take place
+var board_stack = 0.9
+var plate, cuttingBoardBox, menu_stand, trashCan
+var cuttingBoard
+var cutting_board_item = []
+
+
+//*************** Decorative / Stationary Objects 
+var _floor, counter, wall1, wall2, wall3, wall4, wall5, wall6
+var stove, shelf
+var plant1, basket1, basket2,basket3
+
+
+
 //****************Cutting board
 var board_stack = 0.9
 var selected_items
@@ -36,10 +60,11 @@ var cutting_board_item = []
 //************* Action field
 var interactable_obj = []	// list of items that users can interact with
 // var selected_items = []
+
 var holdingitem	= knife			// item that we are currently holding
-var holding = false		   	// is there an item in our hands?
 var holding_item_name		// item name that we are currently holding
 var container_holding_item
+var holding = false		   	// is there an item in our hands?
 var clicked = false
 
 // variable for specific tools
@@ -47,7 +72,10 @@ var knife_clicked = false
 
 // complete order
 var food_in_plate = []
+var food_in_plate_name = []
+
 var iscorrect_food = false
+
 
 
 function setup() {
@@ -508,7 +536,6 @@ class Walls {
 	}
 }
 
-//***Error: unable to display even though everything works fine if not in a container
 class Fridge {
 
 	constructor(){
@@ -615,27 +642,6 @@ class Objects {
 			rotationZ:_rotationZ
 		})
 		world.add(this.utensil)
-
-		// this.hitbox = new Plane({
-		// 	x: x,
-		// 	y: y,
-		// 	z: z,
-		// 	rotationX: _rotationX,
-		// 	rotationY: _rotationY,
-		// 	rotationZ:_rotationZ,
-		// 	scaleX: sX,
-		// 	scaleY: sY,
-		// 	scaleZ: sZ,
-		// 	red:255,
-		// 	opacity: 0.8,
-		//
-		// 	side:'double',
-		// 	upFunction: function(me){
-		// 	}
-		// })
-		// world.add(this.hitbox)
-
-
 	}
 
 }
