@@ -1,6 +1,8 @@
 // PROBLEMS THAT STILL NEEDS SOLVING：
-// - Clicking UI
-// 
+// - needs to fix --> Clicking on the item on cutting board twice will make the item disappear 
+// ------------------------------------------------------------------------------------------------
+// ------------------------------------------------------------------------------------------------
+
 
 var world
 var camX = 0
@@ -11,7 +13,7 @@ var remaining_time = 10
 var score_holder
 
 //*************HUD field
-var recipe_container = ["tomato slice","lettuce shred","bread","beef"]		//temporary recipe holder for a hamburger
+// var recipe_container = ["tomato slice","lettuce shred","bread","beef"]		//temporary recipe holder for a hamburger
 
 var recipe_container, recipe_show_button, recipe_textholder
 var recipe_opened_container,recipe_close_button,recipe_close_textholder
@@ -20,17 +22,18 @@ var holdingitem_show_box
 var holdingitem_show_box_img
 
 //************* UI 
-var selected_items 					// user's current selection
-var selected_items_name
-var save_items, save_items_name
-
+var selected_items,selected_items_name 					// user's current selection
+var save_items, save_items_name		// previously selected item for the cutting board ONLY
 var clearSelectionBtn, selectionUI
-var clearSelection = false
+// var clearSelection = false
 
-var warning, warning_msg
+var warning, messageBoard
+var msg = "Message Board"
+// Plate UI: 
+var assembleBtn, clearPlateBtn
 
 
-//***************customer field
+//*************** Customer field
 var customers_list = []
 var astronaut, astronaut2, r2d2, puppy;
 var customerx,customerycustomerz;
@@ -47,10 +50,13 @@ var pot, pan, knife
 var ketchup, hotSauce
 
 // *************** Interactable Objects 2: ingredients (objects that can have actions implemented on)
-var tomato, tomato_slice, cheese, bread
+var tomato, tomato_slice, cheese, cheese_slice, lettuce, lettuce_shreds, bread
 var steak, asparagus
-var ingredients = []				// array of objects that actions can implement on; 
+// var ingredients = []				// array of objects that actions can implement on; 
 									// this should only be those that can be displayed on cutting board
+
+// ***************  FINAL DISH PRODUCT
+var sandwich, steak_complete
 
 //*************** Decorative / Stationary Objects 
 var _floor, counter, wall1, wall2, wall3, wall4, wall5, wall6
@@ -74,8 +80,9 @@ var selected_items
 var selected_items_name
 
 
-// variable for specific tools
+// variable for specific tools/item/ingredient
 var knife_clicked = false
+var bread_clicked = false
 
 
 // order check
@@ -199,7 +206,7 @@ function setup() {
 	// ****************************** UI ******************************
 		// clear selection button
 		clearSelectionBtn = new Plane({
-			x:0.6, y:0.5, z:-0.8,
+			x:1, y:0.6, z:-0.8,
 			red:185,green:190,blue:195, opacity: 0.8,
 			width:0.5, height:0.1,
 			clickFunction: function(thePlane){
@@ -213,6 +220,7 @@ function setup() {
 					selected_items = undefined
 					selected_items_name = undefined
 				}
+				bread_clicked = false
 
 			}
 		})
@@ -221,18 +229,28 @@ function setup() {
 
 		// show user's current selection 
 		selectionUI = new Plane ({
-			x:-0.6, y:0.5, z:-0.8,
+			x:1, y:0.45, z:-0.8,
 			red:185,green:190,blue:195, opacity: 0.8,
-			width:0.8, height:0.1
+			width:0.5, height:0.1
 		})
 		selectionUI.tag.setAttribute('text','value: You have not selected anything; color: rgb(0,0,0); align:center; height: 1; width:1;')
 
+		// Message Bar
+		messageBoard = new Plane ({
+			x:1, y:0.2, z:-0.8,
+			red:185,green:190,blue:195, opacity: 0.8,
+			width:0.5, height:0.3
+		})
+		messageBoard.tag.setAttribute('text','value: '+ msg +'; color: rgb(0,0,0); align:center; height: 1; width:1;')
+
 		// add Btns to the HUD
 		// selectionUI.tag.setAttribute('cursor','rayOrigin: mouse')		
-		world.camera.cursor.addChild(holdingitem_show_box);
+		// world.camera.cursor.addChild(holdingitem_show_box);
 		world.camera.cursor.addChild(score_holder);
 		world.camera.holder.appendChild(selectionUI.tag);
 		world.camera.holder.appendChild(clearSelectionBtn.tag);
+		world.camera.holder.appendChild(messageBoard.tag);
+
 
 	
 		//show the HUD
@@ -309,8 +327,35 @@ function setup() {
 		// plate = new Interactables('dish_obj','dish_mtl',0.85,0.94,5.13,1.5,1.5,1.5,0,0,0,0.85,0.94,5.13,0,0,0,0.5,'plate')
 		plate = new Interactables('dish_obj','dish_mtl',	0.85, 0.94, 5.13,	1.5,1.5,1.5,	0,0,0,	0.5,0.3,0.5,	'plate')
 
+		// Plate UI -----------------
+		clearPlateBtn = new Plane({
+			x:1.45, y:0.978, z:4.841,
+			width:0.4, height:0.19,
+			rotationX:-128, rotationY:90, rotationZ: 180,
+			red: 189, green: 183, blue:107,
+			clickFunction: function(thePlane){
+				clearPlate()
+			}
+		})
+		clearPlateBtn.tag.setAttribute('text','value: Clear Plate; color: rgb(0,0,0); align: center; width:1.5; height:1.5;');
+		world.add(clearPlateBtn)
 
-		var mat = new Plane ({
+
+		assembleBtn = new Plane({
+			x:1.45, y:0.978, z:5.411,
+			width:0.5, height:0.19,
+			rotationX:-128, rotationY:90, rotationZ: 180,
+			red: 189, green: 183, blue:107,
+			clickFunction: function(thePlane){
+				console.log("Assemble Order")
+				assemblePlate()
+			}
+		})
+		assembleBtn.tag.setAttribute('text','value: Assemble Order; color: rgb(0,0,0); align: center; width:1.5; height:1.5;');
+		world.add(assembleBtn)
+
+
+		mat = new Plane ({
 			x:0.87, y:0.91, z:5.13,
 			width:0.8, height:1,
 			rotationX:-90, rotationZ:0,
@@ -318,7 +363,7 @@ function setup() {
 		})
 		world.add(mat)
 
-		var blanket = new Plane ({
+		blanket = new Plane ({
 			x:-0.92, y:0.91, z:4.13,
 			width:0.8, height:1,
 			rotationX:-90, rotationY:-30,
@@ -385,10 +430,14 @@ function setup() {
 			x:0, y:1.04, z:4.27,
 			width:0.54, height:0.4, depth:0.21,
 			scaleX:0.5,scaleY:0.5,scaleY:0.5,
-			opacity: 0.8,
+			opacity: 0.6,
+			// transparent:true,
 			clickFunction: function(theBox){
-				// items for cutting boards ONLY: LETTUCE, TOMATO, ASPARGUS, CHEESE
+				// items for cutting boards ONLY: LETTUCE, TOMATO, CHEESE
 				// if use has selected an item
+				bread_clicked = false
+				msg = "Message Board"
+
 				if(selected_items != undefined){
 
 					// put the saved selected item in the box
@@ -397,12 +446,19 @@ function setup() {
 						// - prevent user from adding more stuff when cutting board already has other itens
 						if(save_items == undefined){
 							// place sepcific item in center
-							if(selected_items_name == 'tomato' || selected_items_name == 'cheese' ){
+							if(selected_items_name == 'tomato' || selected_items_name == 'cheese' || selected_items_name == 'lettuce' ){
 								save_items = selected_items 
 								save_items_name = selected_items_name
-								save_items.setPosition(theBox.x,theBox.y,theBox.z)
-								console.log("voila")
+								
+								// minor adjustment for lettuce
+								if(selected_items_name == 'lettuce' ){
+									save_items.setPosition(theBox.x,0.91,theBox.z)
+								}else{
+									save_items.setPosition(theBox.x,theBox.y,theBox.z)
+								}
 							}
+						}else{
+							msg = "An item is \n already on \n the cutting board"
 						}						
 					}else{
 						// iniate the animation of cutting
@@ -419,11 +475,37 @@ function setup() {
                             tomato_slice = save_items
 							save_items_name = save_items.name
 							save_items.show()
-						}
 
+							console.log("tomato slice")
+						}
+						// cheese - show cheese slice
+						else if(save_items_name == "cheese"){
+							console.log(save_items)
+							// hide state before cutting & substitute the product
+							save_items.hide()
+							cheese_slice  = new Box({
+								x:theBox.x, y:1.05, z: theBox.z,
+								width:0.17,	height:0.01, depth: 0.16,
+								red:244, green:208, blue:63,
+							})
+							world.add(cheese_slice)
+							save_items_name = "cheese slice"
+
+							console.log("cheese slice")
+
+						}
 						// lettuce - show lettuce shreads
-						if(save_items_name == "lettuce"){
+						else if(save_items_name == "lettuce"){
+							save_items.hide()
+							save_items = new Objects('lettuceShreds_obj', 'lettuceShreds_mtl', 0,1.05,4.28, 0.07,0.07,0.07,	0,0,0, "lettuce shreds")
+							lettuce_shreds = save_items
+							save_items_name = "lettuce shreds"
+							save_items.show()
+
 							console.log("lettuce shreds")
+						}
+						else{
+							msg = "There is nothing \n there to cut"
 						}
 		
 					}
@@ -454,19 +536,31 @@ function setup() {
 		shelf = new Objects('shelf_obj','shelf_mtl',0,0.84,3.64,0.99,0.63,0.72,0,0,0,"shelf")
 		ketchup = new Objects('ketchup_obj','ketchup_mtl',-0.51,1,4.17,0.0003,0.0003,0.0003,0,60,0,"ketchup")
 		trashCan =  new Objects('trashCan_obj','trashCan_mtl',0.28,0.112,4.979,0.002,0.002,0.002,0,0,0,"trashCan")
-		hotSauce =  new Objects('hotSauce_obj','hotSauce_mtl',-0.22,1.18,3.75,0.3,0.3,0.3,0,180,0,"hotSauce")
+		hotSauce =  new Objects('hotSauce_obj','hotSauce_mtl',-0.07,1.18,3.75,0.3,0.3,0.3,0,180,0,"hotSauce")
 
 		// ingrediants
 		bread = new Interactables('bread_obj','bread_mtl',		-1.13,1,4.276,	1,1,1,	-80,30,0,	 0.27,0.08,0.28,	"bread")
-		// 	_asset,		_mtl,			x,	y,	z,		sX,sY,sZ,_rotationX,_rotationY,_rotationZ,	hitboxX,hitboxY,hitboxZ, hitRotationX, hitRotationY, hitRotationZ, hitBozScale,_name
 		tomato= new Interactables('tomato_obj','tomato_mtl',	-0.5,1.45,3.64,	0.005,0.005,0.005,	-90,0,0, 0.3,0.3,0.3,	"tomato")
-		
+		lettuce = new Interactables('lettuce_obj', 'lettuce_mtl', 	-0.17,1.114,5.91,	0.03,0.03,0.03,	0,0,0,	 0.14,0.34,0.15,	"lettuce")
+
+		// var testOBJ = new OBJ({
+		// 	asset:'sandwich_obj',
+		// 	mtl: 'sandwich_mtl',
+		// 	x:0, y:1, z:5,
+		// 	scaleX: 1, scaleY:1, scaleZ:1,
+		// 	// rotationX:0,
+		// 	// rotationY:90
+		// })
+		// world.add(testOBJ)
+
 		cheese = new Box({
 			x:0.072, y:1.387, z:5.97,
 			width:0.1,	height:0.08, depth: 0.13,
 			red:244, green:208, blue:63,
 			clickFunction: function(theBox) {
-				console.log("CHEESE!");
+
+				// disable previous other varibales
+				bread_clicked = false
 
 				// update selected item - create a clone
 				selected_items = new Box({
@@ -477,29 +571,7 @@ function setup() {
 
 				selected_items_name = "cheese"
 
-				console.log(selected_items_name)
-
-				// if(holding == false){
-				// 	holding = true
-				// 	holdingitem_show_box.setAsset("cheese_hold")
-
-				// 		selected_items = new Box({
-				// 			width:0.2,
-				// 			height:0.02,
-				// 			depth:0.2,
-				// 			red:255,green:255,blue:0,
-				// 			rotationX: 0
-				// 		})
-				// 	}
-				// // if user would like to put back the item
-				// else {
-				// 	holding = false
-				// 	holdingitem_show_box.setAsset("")
-
-				// 	holdingitem.hide()
-				// 	holding_item_name = ''
-				// }
-				// console.log("cheese was clicked!")
+				// Go to Cutting board now
 			}
 		})
 		world.add(cheese)
@@ -563,6 +635,7 @@ function draw() {
 				current_customer = random(customers_list);
 			}
 			set_random_customer_order()
+
 			current_customer.add_to_world()
 			remaining_time = int(random(15,30))
 			score -= 1
@@ -578,10 +651,15 @@ function draw() {
 
 	// update selection UI
 	if(selected_items_name == undefined ){
-		selectionUI.tag.setAttribute('text','value: You have not selected anything; color: rgb(0,0,0); align:center; height: 1; width:1;')
+		selectionUI.tag.setAttribute('text','value: Nothing Selected; color: rgb(0,0,0); align:center; height: 1; width:1;')
 	}else{
-		selectionUI.tag.setAttribute('text','value: You selected : '+ selected_items_name + ';  color: rgb(0,0,0); align:center; height: 1; width:1;')
+		selectionUI.tag.setAttribute('text','value: '+ selected_items_name + ';  color: rgb(0,0,0); align:center; height: 1; width:1;')
 	}
+
+
+	// update message
+	messageBoard.tag.setAttribute('text','value: '+ msg +'; color: rgb(0,0,0); align:center; height: 1; width:1;')
+
 
 }
 
@@ -627,66 +705,91 @@ function set_random_customer_order(){
 }
 
 // will edit this later ***
+// checks whether the ingridents are correct
 function check_recipe(){
-	if(current_order == "Steak"){
-		if(food_in_plate[0] == "steak")
-			if(food_in_plate[1] == "asparagus"){
-				//success
-				food_in_plate = []
-				for(let i = 0; i < pan_item.length; i++){
-					world.remove( pan_item[i])
+	console.log("check recipe") 
+	// if(current_order == "Steak"){
+	// 	if(food_in_plate[0] == "steak")
+	// 		if(food_in_plate[1] == "asparagus"){
+	// 			//success
+	// 			food_in_plate = []
+	// 			for(let i = 0; i < pan_item.length; i++){
+	// 				world.remove( pan_item[i])
+	// 			}
+	// 			pan_item = []
+	// 			iscorrect_food = true
+	// 			console.log("GOOD JOB");
+	// 			score += remaining_time * 3
+
+	// 			score_holder.tag.setAttribute('text','value: Score: ' +score+  '\n Remaining Time: '+remaining_time+' ; color: rgb(0,0,0); align: center;');
+
+	// 		}
+	// 		else{
+	// 			//fail
+	// 			food_in_plate = []
+	// 			for(let i = 0; i < pan_item.length; i++){
+	// 				world.remove( pan_item[i])
+	// 			}
+	// 			pan_item = []
+	// 			iscorrect_food = false
+	// 			score -= 1
+	// 			score_holder.tag.setAttribute('text','value: Score: ' +score+  '\n Remaining Time: '+remaining_time+' ; color: rgb(0,0,0); align: center;');
+
+	// 		}
+	// 	else if(food_in_plate[0] == "asparagus"){
+	// 		if(food_in_plate[1] == "steak"){
+	// 			//success
+	// 			food_in_plate = []
+	// 			for(let i = 0; i < pan_item.length; i++){
+	// 				world.remove( pan_item[i])
+	// 			}
+	// 			pan_item = []
+	// 			iscorrect_food = true
+	// 			console.log("GOOD JOB");
+	// 			score += remaining_time * 3
+
+	// 			score_holder.tag.setAttribute('text','value: Score: ' +score+  '\n Remaining Time: '+remaining_time+' ; color: rgb(0,0,0); align: center;');
+	// 		}
+	// 		else{
+	// 			food_in_plate = []
+	// 			for(let i = 0; i < pan_item.length; i++){
+	// 				world.remove( pan_item[i])
+	// 			}
+	// 			pan_item = []
+	// 			iscorrect_food = false
+	// 			score -= 1
+	// 			score_holder.tag.setAttribute('text','value: Score: ' +score+  '\n Remaining Time: '+remaining_time+' ; color: rgb(0,0,0); align: center;');
+
+	// 		}
+
+	// }
+
+	// }
+	if(current_order == "Sandwich"){
+		// if no food in plate
+		if(food_in_plate_name.length == 0){			
+			iscorrect_food = false
+			return false
+		}
+		// if not enough ingrediants in plate
+		else if(food_in_plate_name.length != current_order_requirements.length){
+			iscorrect_food = false
+			return false
+		}
+		// see if there are any WRONG ingredients
+		else{
+			// check each food in plate with recipe
+			for(let i=0; i < food_in_plate_name.length; i++){
+
+				if(!checkPlateToRecipe(food_in_plate_name[i])){
+					iscorrect_food = false
+					return false
 				}
-				pan_item = []
-				iscorrect_food = true
-				console.log("GOOD JOB");
-				score += remaining_time * 3
-
-				score_holder.tag.setAttribute('text','value: Score: ' +score+  '\n Remaining Time: '+remaining_time+' ; color: rgb(0,0,0); align: center;');
-
 			}
-			else{
-				//fail
-				food_in_plate = []
-				for(let i = 0; i < pan_item.length; i++){
-					world.remove( pan_item[i])
-				}
-				pan_item = []
-				iscorrect_food = false
-				score -= 1
-				score_holder.tag.setAttribute('text','value: Score: ' +score+  '\n Remaining Time: '+remaining_time+' ; color: rgb(0,0,0); align: center;');
+			iscorrect_food = true
+			return true
+		}
 
-			}
-		else if(food_in_plate[0] == "asparagus"){
-			if(food_in_plate[1] == "steak"){
-				//success
-				food_in_plate = []
-				for(let i = 0; i < pan_item.length; i++){
-					world.remove( pan_item[i])
-				}
-				pan_item = []
-				iscorrect_food = true
-				console.log("GOOD JOB");
-				score += remaining_time * 3
-
-				score_holder.tag.setAttribute('text','value: Score: ' +score+  '\n Remaining Time: '+remaining_time+' ; color: rgb(0,0,0); align: center;');
-			}
-			else{
-				food_in_plate = []
-				for(let i = 0; i < pan_item.length; i++){
-					world.remove( pan_item[i])
-				}
-				pan_item = []
-				iscorrect_food = false
-				score -= 1
-				score_holder.tag.setAttribute('text','value: Score: ' +score+  '\n Remaining Time: '+remaining_time+' ; color: rgb(0,0,0); align: center;');
-
-			}
-
-	}
-
-	}
-	else if(current_order == "Sandwich"){
-		console.log(food_in_plate);
 		if(food_in_plate[0] == "bread" && food_in_plate[1] == "tomato" && food_in_plate[2] == "cheese" && food_in_plate[3] == "bread"){
 
 				score += remaining_time * 3
@@ -712,63 +815,107 @@ function check_recipe(){
 			score_holder.tag.setAttribute('text','value: Score: ' +score+  '\n Remaining Time: '+remaining_time+' ; color: rgb(0,0,0); align: center;');
 		}
 	}
-	else if(current_order == "Noodle"){
+	// else if(current_order == "Noodle"){
 
 
-	}
+	// }
+
+
 }
 
 // this function checks if given ingredient is already in plate
 function checkPlateItems(ingredient){
-	for(let j=0; j < food_in_plate_name.length; j++){
-		if(ingredient == food_in_plate_name[j]){
-			return true
-		}else{
-			return false
+	// there is nothing in plate
+	if(food_in_plate_name.length == 0){
+		return false
+	}
+	else{
+		for(let j=0; j < food_in_plate_name.length; j++){
+			if(ingredient == food_in_plate_name[j]){
+				// console.log(ingredient, food_in_plate_name[j])
+				return true
+			}
 		}
+		return false
 	}
 }
 
+// checks given ingredient is correct according to current_order_requirements
+function checkPlateToRecipe(ingredient){
+	
+	for(let i=0; i < current_order_requirements.length; i++){
+		if(ingredient == current_order_requirements[i]){
+			return true
+		}
+	}
+	return false
+	
+}
+
+
 function plateFunction(theBox){
 
-	console.log("You clicked plate")
+	// selected_items_name IN THIS FUNCTION IS ALWAYS GOING TO BE = PLATE
+	// console.log(selected_items)
 
 	// if user has selected an item
 	if(selected_items != undefined){
 
-		// check to see what is still lacking in terms of ingrediants
-		if(selected_items_name == "plate" && save_items_name == undefined){
+		// if bread was triggered prior to clicking dish
+		if(bread_clicked){
+			// display bread -------------
+			if(checkPlateItems('bread') == false){
+				console.log("breads on plate")
 
-			let currentlyLack = []
+				var new_bread = new Objects('bread_obj','bread_mtl',	0.765, 0.974, 4.964,	1,1,1,	-80,30,0, "bread")
+
+				food_in_plate.push(new_bread)
+				food_in_plate_name.push(new_bread.name)
+
+				// bread_clicked = false
+
+			}else{
+				msg = "You already have \n bread in the plate"
+				// console.log("You already have bread in the plate")
+			}
+		}
+
+		// user did not select anything previously
+		// check to see what is still lacking in terms of ingrediants
+		if(save_items_name == undefined && bread_clicked == false){
+			
+			console.log("1")
 
 			// Display what user still needs
 			// SANDWICH
 			if(current_order == "Sandwich"){
 				// if there is nothing in plate
 				if(food_in_plate_name.length == 0){
-					console.log("You still need: "+ current_order_requirements)
+					// console.log("current order requirements: "+current_order_requirements)
+					// console.log("food in plate name: "+food_in_plate_name)
+					msg = "You still need: \n" + current_order_requirements
+					// console.log("You still need: "+ current_order_requirements)
 				}
 				else{
 					if(current_order_requirements.length == food_in_plate_name.length){
-						console.log("The order is ready to be served!")
+						console.log("The order is \n ready to be served!")
 					}else{ 
-						for(let i=0; i < current_order_requirements.length; i++){
-							
-							for(let j=0; j < food_in_plate_name.length; j++){
-								// if food in plate != ingredients in current order
-								if(food_in_plate_name[j] != current_order_requirements[i]){
-									currentlyLack.push(current_order_requirements[i])
+						for(let i=0; i < food_in_plate_name.length; i++){
+							for(let j=0; j < current_order_requirements.length; j++){
+								// remove from current order what is required
+								if(food_in_plate_name[i] == current_order_requirements[j]){
+									current_order_requirements.splice(j,1)
 								}
 							}
 						}
 						// what user still lacks
-						console.log("You still need: "+ currentlyLack)
+						msg= "You still need: \n"+ current_order_requirements
 					}
 
 				}
 			}
 
-			
+
 			// STEAK
 
 
@@ -777,14 +924,19 @@ function plateFunction(theBox){
 
 		}
 
-		else if(selected_items_name == "plate" && save_items_name != undefined){
+		// SHOW CUTTING BOARD INGREIDNTS TO PLATE: lettuce shreds, cheese slice, tomato slice
+		else if(save_items_name != undefined){
+			console.log("2")
+			// console.log(checkPlateItems(save_items_name))
+			// console.log(food_in_plate_name)
+
 
 			// check if selected item is ALREADY in plate
 			if(checkPlateItems(save_items_name)){
-				console.log("You have already put "+save_items_name+" in the plate.")
+				msg = "You have already \n put this item \n in the plate."
 			}
 			else{
-				// user selected tomato slice 
+				//TOMATO SLICE ------
 				if(save_items_name == "tomato slice"){
 
 					save_items.utensil.hide()
@@ -797,22 +949,123 @@ function plateFunction(theBox){
 		
 					// add ingredient to the plate array
 					food_in_plate.push(tomato_slice)
-					food_in_plate_name.push(tomato_slice.name)
+					food_in_plate_name.push("tomato slice")
 		
 					world.add(tomato_slice)
 				}
-				// else{
-				// 	console.log("Wrong Ingredient!")
-				// }
-			}
 
+				//CHEESE SLICE ------
+				if(save_items_name == "cheese slice"){
+					// hide cheese slide on the cutting board
+					cheese_slice.hide()
+					cheese_slice.setPosition(0.7,1.052,5.3)
+					cheese_slice.show()
+
+					save_items = undefined
+					save_items_name = undefined
+
+					food_in_plate.push(cheese_slice)
+					food_in_plate_name.push("cheese slice")
+
+					// save_items = undefined
+					// save_items_name = undefined
+				}
+
+				//LETTUCE SHREDS ------
+				if(save_items_name == "lettuce shreds"){
+		
+					save_items.utensil.hide()
+					lettuce_shreds.utensil.setPosition(1.02, 1, 5.16)
+					lettuce_shreds.utensil.show()
+		
+					// clear save_items
+					save_items = undefined
+					save_items_name = undefined
+		
+					// add ingredient to the plate array
+					food_in_plate.push(lettuce_shreds)
+					food_in_plate_name.push("lettuce shreds")
+
+					console.log("lettuce shreds")
+
+					world.add(tomato_slice)
+				}
+				
+			}
 		}
-		// console.log(save_items_name, save_items)
+				
 
 	}
 
 		
 }
+
+// assembles all ingrdients to final dish
+function assemblePlate(){
+
+	// check if current order is correct for assembly
+	if(check_recipe()){
+		// remove all in plate
+		plateIngredientRemoval()
+
+		if(current_order == "Sandwich"){
+			// transform to final product and add to plate array
+			sandwich = new Objects('sandwich_obj','sandwich_mtl',	0.81,1,5.12,	0.99,0.63,0.72,	0,90,-90,"sandwich")
+			
+			food_in_plate.push(sandwich)
+			food_in_plate_name.push("sandwich")
+
+			world.add(sandwich)
+		}
+		else if(current_order == "Steak"){
+
+		}
+
+		iscorrect_food = true
+
+		// display message
+		msg = "Here is your \n\n" + food_in_plate_name
+
+		// PROCEED TO SERVE FUNCTION
+	}
+	else{
+		// display message
+		iscorrect_food = false
+		msg = "Incorrect Ingredients \n or \n Missing Ingredients"
+	}
+
+}
+
+function clearPlate(){
+
+	if(food_in_plate_name.length != 0){
+		// remove everything in the plate
+		plateIngredientRemoval()
+
+		msg = "Message Board"
+	}
+	else{
+		msg = "You have nothing \n\n in your plate"
+	}
+}
+
+// clears everything in plate
+function plateIngredientRemoval(){
+	for(let i=0; i < food_in_plate.length; i++){
+		// cheese slice is not an OBJ therefore have to be treated differently
+		if(food_in_plate[i] == cheese_slice){
+			world.remove(food_in_plate[i])
+		}
+		else{
+			world.remove(food_in_plate[i].utensil)
+		}
+	}
+
+	// clear variables
+	food_in_plate = []
+	food_in_plate_name = []
+}
+
 
 function knifeMovement(){
 
@@ -848,6 +1101,16 @@ function knifeMovement(){
 }
 
 
+function serveOrder(){
+	// clear plate
+	plateIngredientRemoval()
+
+	// score calculation
+	score += remaining_time * 3
+	score_holder.tag.setAttribute('text','value: Score: ' +score+  '\n Remaining Time: '+remaining_time+' ; color: rgb(0,0,0); align: center;');
+
+	
+}
 
 // ****************************** CLASSES ******************************
 // ---------------------------------------------------------------------
@@ -892,6 +1155,7 @@ class Fridge {
 			rotationX:0,opacity:0.5,
 			clickFunction: function(me){
 				fridge.Open_Door()
+				msg = "Fridge Opened"
 
 			}
 
@@ -904,6 +1168,7 @@ class Fridge {
 			rotationY:220,opacity:0.5,
 			clickFunction: function(me){
 				fridge.Close_Door()
+				msg = "Fridge Closed"
 
 			}
 
@@ -992,13 +1257,13 @@ class Interactables {
 			scaleY: hitBozScaleY,
 			scaleZ: hitBozScaleZ,
 
-			opacity: 0.8,
+			opacity: 0.6,
 
 
 			clickFunction: function(theBox){
-				// update selected item
-					// unable to refer to the obejct directly via this.utensil
-					// therefore have to create another obj 
+
+				// update current selection 
+				selected_items_name = _name
 				selected_items = new OBJ({asset:_asset,
 					mtl: _mtl,
 					x:x, y:y, z:z,
@@ -1008,8 +1273,8 @@ class Interactables {
 					rotationZ:_rotationZ
 				})						
 
-				// update current selection name
-				selected_items_name = _name
+				// generic message for all items if nothing unordinary
+				msg = "Message Board"
 
 				// if selected item is knife
 				if(selected_items_name == 'knife'){
@@ -1019,22 +1284,25 @@ class Interactables {
 						knife_clicked = true
 					}
 					knifeMovement()
-					console.log(knife_clicked)
-
+					// console.log(knife_clicked)
 				}
 
 				else{
 					knife_clicked = false
-					
-					// selected item = plate
-					if(selected_items_name == 'plate'){
-						// if(save_items_name == "tomato slice"){
-							plateFunction()
-						// }
+
+					if(selected_items_name == "bread"){
+						bread_clicked = true
 					}
+					else if(selected_items_name == 'plate'){
+						plateFunction()
+					} 
+					else{
+						bread_clicked = false
+					}
+				
 					knifeMovement()
+
 				}
-				// console.log(knife_clicked)
 			}
 
 			// clickFunction: function(theBox){
@@ -1215,7 +1483,7 @@ class Customer{
 				// customer has been clicked 
 				customer_clicked = true
 				//reveal order
-				console.log(current_order);
+				// console.log(current_order);
 			}
 		})
 
@@ -1231,25 +1499,30 @@ class Customer{
 			scaleZ: 1,
 			asset:'serveimg',
 			side:'double',
-			clickFunction: function(me){
-
-				console.log("you served " + current_order);
+			clickFunction: function(me){				
 				//check food
-				check_recipe()
 				if(iscorrect_food){
-
-					//score
 					current_customer.remove_from_world()
 					let prev_customer = current_customer
 					while(prev_customer == current_customer){
 						current_customer = random(customers_list);
 					}
 					set_random_customer_order()
-					console.log(recipe_detail);
+					// console.log(recipe_detail);
 					recipe_close_textholder.tag.setAttribute('text','value:' +recipe_detail+ ' ; color: rgb(0,0,0); align: center;');
 
 					current_customer.add_to_world()
+					
+					// serve order
+					serveOrder()
+
 					iscorrect_food = false
+
+					msg = "You successfully \n served a " + current_order
+
+				}
+				else{
+					msg = "The order is \n not ready"
 				}
 			}
 		})
@@ -1268,8 +1541,9 @@ class Customer{
 			asset: 'kickoutimg',
 			side:'double',
 			clickFunction: function(me){
+				msg = "Oh no! \n You just kicked out \n a dear customer"
 
-				console.log("Kicked out the customer");
+				// console.log("Kicked out the customer");
 				remaining_time = int(random(15,30))
 
 				score -= 1
@@ -1278,7 +1552,7 @@ class Customer{
 				for(let i = 0; i < cutting_board_item.length; i++){
 					world.remove( cutting_board_item[i])
 				}
-				cutting_board_item = []
+				// cutting_board_item = []
 				current_customer.remove_from_world()
 				let prev_customer = current_customer
 				while(prev_customer == current_customer){
@@ -1312,6 +1586,7 @@ class Customer{
 	}
 
 }
+
 
 class Walls {
 	constructor(x,z,yrotate){
