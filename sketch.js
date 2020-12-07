@@ -662,7 +662,7 @@ function draw() {
 
 	// move the holding item correspondingly following the mouse
 	if(knife_clicked){
-		holdingitem.setX(map(mouseX,0,windowWidth,-1,1))
+		holdingitem.setX(map(mouseX,0,windowWidth,-1,1) + 0.11)
 		holdingitem.setY(map(mouseY,0,windowHeight,-0.5,0.5) * -1)
 	}
 
