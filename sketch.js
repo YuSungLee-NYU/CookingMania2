@@ -711,6 +711,8 @@ function set_random_customer_order(){
 		// recipe_detail = "The Customer wants a Sandwich \n\n Get the bread on the cutting board \n Get the tomato on the cuttin board \n Get the cheese on the cutting board \n Get the bread on the cutting board"
 		recipe_detail = "Current Order: Sandwich \n\n 1. Cut tomato into tomato slice and put on plate \n\n 2. Take a slice of bread and put on plate \n\n3. Take cheese from fridge and cut into cheese slice \n\n 4. Put cheese slice on plate \n\n 5. Cut lettuce from fridge into lettuce shreds \n\n 6. Place lettuce shreds on plate \n\n 7. Assemble the order \n\n 8. Serve the order"
 	}
+	recipe_show_button.tag.setAttribute('text','value: '+recipe_detail+'; color: rgb(0,0,0); align: center;');
+	recipe_textholder.tag.setAttribute('text','value: '+recipe_detail+';color: rgb(0,0,0); align: center;');
 
 }
 
@@ -1557,6 +1559,7 @@ class Customer{
 			side:'double',
 			clickFunction: function(me){
 				msg = "Oh no! \n You just kicked out \n a dear customer"
+				set_random_customer_order()
 
 				// console.log("Kicked out the customer");
 				remaining_time = int(random(60,120))
@@ -1573,7 +1576,6 @@ class Customer{
 				while(prev_customer == current_customer){
 					current_customer = random(customers_list);
 				}
-				set_random_customer_order()
 				current_customer.add_to_world()
 
 			}
