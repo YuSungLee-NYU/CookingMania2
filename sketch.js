@@ -777,6 +777,7 @@ function check_recipe(){
 	// }
 
 		// if no food in plate
+		console.log(food_in_plate_name)
 		if(food_in_plate_name.length == 0){			
 			iscorrect_food = false
 			return false
