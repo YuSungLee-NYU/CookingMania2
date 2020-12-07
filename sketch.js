@@ -16,7 +16,7 @@ var score_holder
 // var recipe_container = ["tomato slice","lettuce shred","bread","beef"]		//temporary recipe holder for a hamburger
 
 var recipe_container, recipe_show_button, recipe_textholder
-var recipe_opened_container,recipe_close_button,recipe_close_textholder
+var recipe_button_container,recipe_close_button,recipe_close_textholder
 var recipe_detail
 var holdingitem_show_box
 var holdingitem_show_box_img
@@ -24,13 +24,15 @@ var holdingitem_show_box_img
 //************* UI 
 var selected_items,selected_items_name 					// user's current selection
 var save_items, save_items_name		// previously selected item for the cutting board ONLY
-var clearSelectionBtn, selectionUI
+var clearSelectionBtn, selectionUI	// clear selection and show current selection
 // var clearSelection = false
 
-var warning, messageBoard
+var messageBoard
 var msg = "Message Board"
 // Plate UI: 
-var assembleBtn, clearPlateBtn
+var assembleBtn, clearPlateBtn		// button that clears plate nad assemble ingredient into final dish
+var clearBoardBtn					// button that clears cutting board items
+
 
 
 //*************** Customer field
@@ -94,6 +96,7 @@ var food_in_plate_name = []					// name of ingre currently in plate
 // var dish_clicked = false
 
 var iscorrect_food = false
+var showRecipe = false
 
 
 
@@ -103,112 +106,139 @@ function setup() {
 	noCanvas();
 	world = new World('VRScene');
 
-	let recipex = -1.5;
-	let recipey = 0.5;
-	let recipez = -0.1;
 
-	// *************** Check recipe button **************
-	recipe_container = new Container3D({
-		x:recipex
-	});
+
+	// *************** RECIPE **************
+
+	let recipex = 0;
+	let recipey = 1.04;
+	let recipez = 4.16;
+
+
+
 	recipe_show_button = new Plane({
-		x:0, y:recipey,z:recipez,
-		red:255,green:0,blue:0,
-		width:1,height:0.5,depth:1,
+		x:0.9, y:recipey,z:recipez,
+		red:255,green:239,blue:213,
+		width:0.23,height:0.36,
+		rotationX: -40, rotationY: -40,
 		clickFunction: function(me){
 
-			console.log("Show Recipe");
-			console.log(customer_clicked)
-			recipe_opened_container.setY(0);
-			recipe_opened_container.show()
-			recipe_container.hide();
-			recipe_container.setY(-100);
+			console.log("Show Receipe");
+			recipe_textholder.show()
+			recipe_close_button.show()
+			recipe_container.setZ(0)
 		}
 	})
-	recipe_textholder = new Plane({
+	world.add(recipe_show_button)
 
-		x:0, y:recipey,z:recipez,
-		width: 1, height: 0.3,
-		red: 255, green: 255, blue: 255,
-		clickFunction: function(me){
 
-			console.log("Show Recipe");
-			recipe_opened_container.setY(0);
-			recipe_opened_container.show()
-			recipe_container.hide();
-			recipe_container.setY(-100);
-		}
-
-	})
-	recipe_textholder.tag.setAttribute('text','value: Check Recipe; color: rgb(0,0,0); align: center;');
-	recipe_container.addChild(recipe_show_button);
-	recipe_container.addChild(recipe_textholder);
-	world.camera.cursor.addChild(recipe_container);
-
-	//********************When recipe is opend
-	recipe_opened_container = new Container3D({
-		x:recipex,
-		y: -100
+	// Recipe hodler : will display on HUD
+	recipe_container = new Container3D({
+		// this contains: Recipe detail display on HUD and recipe close button 
+		z:0 
 	});
+
+	recipe_textholder = new Plane({
+		x:0, y:0,z:-0.5,
+		width: 0.5, height: 0.5,
+		red:255,green:215,blue:0,
+		clickFunction: function(me){
+			// display current recipe detail
+		}
+	})
+	recipe_textholder.tag.setAttribute('text','value: '+recipe_detail+';color: rgb(0,0,0); align: center;');
+	
+	// close btn on recipe display
 	recipe_close_button = new Plane({
-		x:0, y:recipey,z:recipez,
-		red:255,green:0,blue:0,
-		width:1,height:0.5,depth:1,
+		x:0.19, y:0.2,z:-0.49,
+		red:255,green:215,blue:0,
+		width:0.05,height: 0.05,
+		asset:'close_btn',
+		// transparent:true,
 		clickFunction: function(me){
 
 			console.log("close Recipe");
-			recipe_container.setY(0);
-			recipe_container.show()
-			recipe_opened_container.hide();
-			recipe_opened_container.setY(-100);
+			recipe_textholder.hide()
+			recipe_close_button.hide()
+			
+			recipe_container.setZ(1)
+
 		}
 	})
-	recipe_close_textholder = new Plane({
-
-		x:0, y:recipey,z:recipez,
-		width: 1, height: 0.3,
-		red: 255, green: 255, blue: 255,
-		clickFunction: function(me){
-
-			console.log("close Recipe");
-			recipe_container.setY(0);
-			recipe_container.show()
-			recipe_opened_container.hide();
-			recipe_opened_container.setY(-100);
-		}
-
-	})
-	recipe_close_textholder.tag.setAttribute('text','value:' +recipe_detail+ ' ; color: rgb(0,0,0); align: center;');
-	recipe_opened_container.addChild(recipe_close_button);
-	recipe_opened_container.addChild(recipe_close_textholder);
-	world.camera.cursor.addChild(recipe_opened_container);
-	recipe_opened_container.hide();
 
 
-	//************************ Hold Item Show box
-	holdingitem_show_box = new Plane({
-		x:0,y:0.5,z:0,
-		width:0.2,
-		height:0.2
-	})
-	remaining_time = int(random(15,30))
+	// hide upon refresh
+	recipe_textholder.hide()
+	recipe_close_button.hide()
 
-	score_holder = new Plane({
-		x:0,y:0.7,z:0,
-		red:186,green:255,blue:201,
-		width:0.5,
-		height:0.2
-	})
-	score_holder.tag.setAttribute('text','value: Score: ' +score+  '\n Remaining Time: '+remaining_time+' ; color: rgb(0,0,0); align: center; width:1; height:1;');
-	// **suggestion: add a # of orders completed successfully
+	recipe_container.addChild(recipe_textholder);
+	recipe_container.addChild(recipe_close_button);
+	world.camera.holder.appendChild(recipe_container.tag);
 
+
+
+	// recipe close button
+	// recipe_button_container = new Container3D({
+	// 	x:recipex,
+	// 	y: -100
+	// });
+	// recipe_close_button = new Plane({
+	// 	x:0, y:recipey,z:recipez,
+	// 	red:255,green:0,blue:0,
+	// 	width:1,height:0.5,depth:1,
+	// 	clickFunction: function(me){
+
+	// 		console.log("close Recipe");
+	// 		recipe_container.setY(0);
+	// 		recipe_container.show()
+	// 		recipe_button_container.hide();
+	// 		recipe_button_container.setY(-100);
+	// 	}
+	// })
+	// recipe_close_textholder = new Plane({
+
+	// 	x:0, y:recipey,z:recipez,
+	// 	width: 0.5, height: 0.3,
+	// 	red: 255, green: 255, blue: 255,
+	// 	clickFunction: function(me){
+
+	// 		console.log("close Recipe");
+	// 		recipe_container.setY(0);
+	// 		recipe_container.show()
+	// 		recipe_button_container.hide();
+	// 		recipe_button_container.setY(-100);
+	// 	}
+
+	// })
+	// recipe_close_textholder.tag.setAttribute('text','value:' +recipe_detail+ ' ; color: rgb(0,0,0); align: center;');
+	// recipe_button_container.addChild(recipe_close_button);
+	// recipe_button_container.addChild(recipe_close_textholder);
+	// world.camera.cursor.addChild(recipe_button_container);
+	// recipe_button_container.hide();
 
 	// ****************************** UI ******************************
+		// Hold Item Show box
+		holdingitem_show_box = new Plane({
+			x:0,y:0.5,z:0,
+			width:0.2,
+			height:0.2
+		})
+		remaining_time = int(random(15,30))
+
+		score_holder = new Plane({
+			x:0,y:0.7,z:0,
+			red:186,green:255,blue:201,
+			width:0.5,
+			height:0.2
+		})
+		score_holder.tag.setAttribute('text','value: Score: ' +score+  '\n Remaining Time: '+remaining_time+' ; color: rgb(0,0,0); align: center; width:1; height:1;');
+		// **suggestion: add a # of orders completed successfully
+		
 		// clear selection button
 		clearSelectionBtn = new Plane({
-			x:1, y:0.6, z:-0.8,
+			x:0.45, y:0.515, z:-0.8,
 			red:185,green:190,blue:195, opacity: 0.8,
-			width:0.5, height:0.1,
+			width:0.4, height:0.07,
 			clickFunction: function(thePlane){
 				console.log("Clear Selection!")
 			
@@ -224,22 +254,22 @@ function setup() {
 
 			}
 		})
-		clearSelectionBtn.tag.setAttribute('text','value: Clear Selection ; color: rgb(0,0,0); align:center; height: 1; width:1;')
+		clearSelectionBtn.tag.setAttribute('text','value: Clear Selection ; color: rgb(0,0,0); align:center; height: 0.7; width:0.7;')
 
 
 		// show user's current selection 
 		selectionUI = new Plane ({
-			x:1, y:0.45, z:-0.8,
+			x:0.45, y:0.6, z:-0.8,
 			red:185,green:190,blue:195, opacity: 0.8,
-			width:0.5, height:0.1
+			width:0.4, height:0.07
 		})
-		selectionUI.tag.setAttribute('text','value: You have not selected anything; color: rgb(0,0,0); align:center; height: 1; width:1;')
+		selectionUI.tag.setAttribute('text','value: You have not selected anything; color: rgb(0,0,0); align:center; height: 0.7; width: 0.7;')
 
 		// Message Bar
 		messageBoard = new Plane ({
-			x:1, y:0.2, z:-0.8,
+			x: -0.5, y:0.56, z:-0.8,
 			red:185,green:190,blue:195, opacity: 0.8,
-			width:0.5, height:0.3
+			width:0.5, height:0.155
 		})
 		messageBoard.tag.setAttribute('text','value: '+ msg +'; color: rgb(0,0,0); align:center; height: 1; width:1;')
 
@@ -253,11 +283,12 @@ function setup() {
 
 
 	
-		//show the HUD
+	//show the HUD
 	world.camera.cursor.show();
 
 	// Ajust Camera
 	world.setUserPosition(camX,camY,camZ)
+
 	// disable WASD control
 	//world.camera.holder.removeAttribute('wasd-controls')
 
@@ -283,10 +314,13 @@ function setup() {
 	current_customer.add_to_world()
 
 	//**************** ORDER **************** 
-	// customer_order_list = ["Steak", "Hamburger","Sandwich"]
-	customer_order_list = ["Sandwich"]
+	// customer_order_list = ["Steak", "Third Order","Sandwich"]
+	customer_order_list = ["Steak","Sandwich"]
 
 	set_random_customer_order()
+
+	// recipe_show_button.tag.setAttribute('text','value: Click \n to \n see \n Current \n Recipe; color: rgb(0,0,0); align: center; width: 0.5; height: 0.5;');
+	// recipe_textholder.tag.setAttribute('text','value: '+recipe_detail+';color: rgb(0,0,0); align: center;');
 
 
 
@@ -457,8 +491,9 @@ function setup() {
 									save_items.setPosition(theBox.x,theBox.y,theBox.z)
 								}
 							}
+							// msg = "Message Board"
 						}else{
-							msg = "An item is \n already on \n the cutting board"
+							// msg = "An item is \n already on \n the cutting board"
 						}						
 					}else{
 						// iniate the animation of cutting
@@ -527,6 +562,20 @@ function setup() {
 		world.add(cuttingBoard)
 		world.add(cuttingBoardBox)
 
+		// clear items on cutting board
+		clearBoardBtn = new Plane({
+			x:-0.478, y:1, z:4.037,
+			width:0.33, height:0.1,
+			rotationX:-128, rotationY:180, rotationZ: 180,
+			red: 189, green: 183, blue:107,
+			clickFunction: function(thePlane){
+				console.log("Clear Items")
+				clearCuttingBoard()
+			}
+		})
+		clearBoardBtn.tag.setAttribute('text','value: Clear Cutting Board; color: rgb(0,0,0); align: center; width:0.7; height:0.7;');
+		world.add(clearBoardBtn)
+
 		// KNIFE
 		knife = new Interactables('knife_obj','knife_mtl',	0.378, 0.84,4.35,	0.0015,0.0015,0.0015,	90,90,0,	0.25,0.2,0.42, "knife")
 
@@ -535,7 +584,7 @@ function setup() {
 		// spice shelf
 		shelf = new Objects('shelf_obj','shelf_mtl',0,0.84,3.64,0.99,0.63,0.72,0,0,0,"shelf")
 		ketchup = new Objects('ketchup_obj','ketchup_mtl',-0.51,1,4.17,0.0003,0.0003,0.0003,0,60,0,"ketchup")
-		trashCan =  new Objects('trashCan_obj','trashCan_mtl',0.28,0.112,4.979,0.002,0.002,0.002,0,0,0,"trashCan")
+		// trashCan =  new Objects('trashCan_obj','trashCan_mtl',0.28,0.112,4.979,0.002,0.002,0.002,0,0,0,"trashCan")
 		hotSauce =  new Objects('hotSauce_obj','hotSauce_mtl',-0.07,1.18,3.75,0.3,0.3,0.3,0,180,0,"hotSauce")
 
 		// ingrediants
@@ -580,7 +629,7 @@ function setup() {
 		// asparagus = new Interactables('aspara_obj','aspara_mtl',	-0.2,1.387,5.97,	0.07,0.07,0.07,	-0,-60,0, -0.2,1.387,5.97,0,0,0,0.2,	"asparagus")
 
 		// ******** DECORATIONS ********
-		plant1 = new Objects('plant1_obj','plant1_mtl',			1.26,0.88,4.24,		0.1,0.1,0.1,	0,0,0)
+		// plant1 = new Objects('plant1_obj','plant1_mtl',			1.26,0.88,4.24,		0.1,0.1,0.1,	0,0,0)
 		// var basket1 = new Objects('basket_obj','basket_mtl',	-0.86,1,4.48,		0.5,0.5,0.5,	0,0,0)
 		// var basket2 = new Objects('basket_obj','basket_mtl',	-0.72,1,4.27,		0.5,0.5,0.5,	0,0,0)
 		// var basket3 = new Objects('basket_obj','basket_mtl',	-0.58,1,4.05,		0.5,0.5,0.5,	0,0,0)
@@ -623,7 +672,7 @@ function draw() {
 
 	// DISPLAY SCORE
 	if(frameCount%60 == 0){
-		score_holder.tag.setAttribute('text','value: Score: ' +score+  '\n Remaining Time: '+remaining_time+' ; color: rgb(0,0,0); align: center;');
+		score_holder.tag.setAttribute('text','value: Your Score: ' +score+  '\n Remaining Time: '+remaining_time+' ; color: rgb(0,0,0); align: center;');
 
 		remaining_time -= 1
 		if(remaining_time <= 0){
@@ -651,14 +700,18 @@ function draw() {
 
 	// update selection UI
 	if(selected_items_name == undefined ){
-		selectionUI.tag.setAttribute('text','value: Nothing Selected; color: rgb(0,0,0); align:center; height: 1; width:1;')
+		selectionUI.tag.setAttribute('text','value: Nothing Selected; color: rgb(0,0,0); align:center; height: 0.7; width:0.7;')
 	}else{
-		selectionUI.tag.setAttribute('text','value: '+ selected_items_name + ';  color: rgb(0,0,0); align:center; height: 1; width:1;')
+		selectionUI.tag.setAttribute('text','value: '+ selected_items_name + ';  color: rgb(0,0,0); align:center; height: 0.7; width:0.7;')
 	}
 
 
 	// update message
-	messageBoard.tag.setAttribute('text','value: '+ msg +'; color: rgb(0,0,0); align:center; height: 1; width:1;')
+	messageBoard.tag.setAttribute('text','value: '+ msg +'; color: rgb(0,0,0); align:center; height: 0.7; width: 0.7;')
+
+	// display recipe details
+	recipe_show_button.tag.setAttribute('text','value: '+recipe_detail+'; color: rgb(0,0,0); align: center;');
+	recipe_textholder.tag.setAttribute('text','value: '+recipe_detail+';color: rgb(0,0,0); align: center;');
 
 
 }
@@ -679,32 +732,22 @@ function set_random_customer_order(){
 		current_order_requirements = []
 	}
 
-	// check if user has clicked on the customer to get the order 
-	// user HAS to click in order to find out (???)
-	// display order on check recipe
-	if(customer_clicked){
-
-		if(current_order == "Steak"){
-			recipe_detail = "The Customer wants a Steak \n\n Pick a steak \n Click the pan \n pick a asparagus \n Click the pan \n Click the Plate \n Click Give"
-		}
-		// ** Suggestion: change or remove noodle to sth else, maybe a drink??
-		else if(current_order == "Noodle"){
-			recipe_detail = "Noodles Instruction Here"
-		}
-		else if(current_order == "Sandwich"){
-			// recipe_detail = "The Customer wants a Sandwich \n\n Get the bread on the cutting board \n Get the tomato on the cuttin board \n Get the cheese on the cutting board \n Get the bread on the cutting board"
-			recipe_detail = "Sandwich Instruction Here"
-		}
+	// update recipe detail based on order
+	if(current_order == "Steak"){
+		recipe_detail =  "Current Order: Steak \n\n 1. Take out meat from fridge \n\n 2. Grill it on pan \n\n 3. Place grilled steak on plate \n\n 4. Take out asparagus from fridge \n\n 5. Place asparagus on the pan \n\n 6. Place asparagus in the Plate \n\n 7. Assemble the order \n\n 8. Serve the order"
 	}
-	else{
-		recipe_detail = "Please click on a customer to see order"
+	// ** Suggestion: change or remove noodle to sth else, maybe a drink??
+	else if(current_order == "Noodle"){
+		recipe_detail = "Noodles Instruction Here"
 	}
-
-	recipe_close_textholder.tag.setAttribute('text','value:' +recipe_detail+ ' ; color: rgb(0,0,0); align: center;');
+	else if(current_order == "Sandwich"){
+		// recipe_detail = "The Customer wants a Sandwich \n\n Get the bread on the cutting board \n Get the tomato on the cuttin board \n Get the cheese on the cutting board \n Get the bread on the cutting board"
+		recipe_detail = "Current Order: Sandwich \n\n 1. Cut tomato into tomato slice and put on plate \n\n 2. Take a slice of bread and put on plate \n\n3. Take cheese from fridge and cut into cheese slice \n\n 4. Put cheese slice on plate \n\n 5. Cut lettuce from fridge into lettuce shreds \n\n 6. Place lettuce shreds on plate \n\n 7. Assemble the order \n\n 8. Serve the order"
+	}
 
 }
 
-// will edit this later ***
+// Recipe Function ----------
 // checks whether the ingridents are correct
 function check_recipe(){
 	console.log("check recipe") 
@@ -822,7 +865,6 @@ function check_recipe(){
 
 
 }
-
 // this function checks if given ingredient is already in plate
 function checkPlateItems(ingredient){
 	// there is nothing in plate
@@ -839,7 +881,6 @@ function checkPlateItems(ingredient){
 		return false
 	}
 }
-
 // checks given ingredient is correct according to current_order_requirements
 function checkPlateToRecipe(ingredient){
 	
@@ -851,7 +892,6 @@ function checkPlateToRecipe(ingredient){
 	return false
 	
 }
-
 
 function plateFunction(theBox){
 
@@ -1000,6 +1040,16 @@ function plateFunction(theBox){
 		
 }
 
+function serveOrder(){
+	// clear plate
+	plateIngredientRemoval()
+
+	// score calculation
+	score += remaining_time * 3
+	score_holder.tag.setAttribute('text','value: Score: ' +score+  '\n Remaining Time: '+remaining_time+' ; color: rgb(0,0,0); align: center;');
+}
+
+// Functions for UI ----------
 // assembles all ingrdients to final dish
 function assemblePlate(){
 
@@ -1049,7 +1099,37 @@ function clearPlate(){
 	}
 }
 
-// clears everything in plate
+function clearCuttingBoard(){
+	// check if there is previously saved item on cutting board
+	if(save_items_name != undefined){
+		console.log("Cleared")
+		console.log(save_items_name, save_items)
+
+		if(save_items_name == "tomato" || save_items_name == "lettuce" ||save_items_name == "cheese"){
+			world.remove(save_items)
+		}else if(save_items_name == "cheese slice"){
+			world.remove(cheese_slice)
+		}
+		else{
+			world.remove(save_items.utensil)
+		}
+
+		// message board msg
+		msg = "You removed \n" + save_items_name
+
+		// clear cutting board variables
+		save_items_name = undefined
+		save_items = undefined
+		
+		// clear selection
+		selected_items_name = "Nothing Selected"
+		selected_items = undefined
+
+	}else{
+		msg = "There is nothing \n on cutting board"
+	}
+}
+
 function plateIngredientRemoval(){
 	for(let i=0; i < food_in_plate.length; i++){
 		// cheese slice is not an OBJ therefore have to be treated differently
@@ -1100,17 +1180,6 @@ function knifeMovement(){
 	}
 }
 
-
-function serveOrder(){
-	// clear plate
-	plateIngredientRemoval()
-
-	// score calculation
-	score += remaining_time * 3
-	score_holder.tag.setAttribute('text','value: Score: ' +score+  '\n Remaining Time: '+remaining_time+' ; color: rgb(0,0,0); align: center;');
-
-	
-}
 
 // ****************************** CLASSES ******************************
 // ---------------------------------------------------------------------
@@ -1447,7 +1516,6 @@ class Interactables {
 
 }
 
-
 class Customer{
 
 	constructor(_asset, _mtl, x_align,y_align,z_align,_rotationY,_scale,_name){
@@ -1481,9 +1549,9 @@ class Customer{
 			side:'double',
 			clickFunction: function(me){
 				// customer has been clicked 
-				customer_clicked = true
+				// customer_clicked = true
 				//reveal order
-				// console.log(current_order);
+				console.log(current_order);
 			}
 		})
 
@@ -1581,13 +1649,13 @@ class Customer{
 
 	remove_from_world(){
 		// set customer  clicked to false
-		customer_clicked = false
+		// customer_clicked = false
 		this.container.setY(-10)
 	}
 
 }
 
-
+// counter walls
 class Walls {
 	constructor(x,z,yrotate){
 		this.wall = new Plane({
