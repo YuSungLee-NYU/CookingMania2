@@ -689,6 +689,7 @@ function draw() {
 // ---------------------------------------------------------------------
 function set_random_customer_order(){
 	// pick a random order from customer order_list
+	clearPlate()
 	current_order = random(customer_order_list);
 
 	if(current_order == "Steak"){
