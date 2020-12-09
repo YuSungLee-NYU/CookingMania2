@@ -52,6 +52,7 @@ var steak, cooked_steak, asparagus, cooked_asparagus
 var noodle, cooked_noodle, egg, cooked_egg, noodle_container, water
 var noodle_ready_to_cook = false, noodle_cooked = false
 var start_water = false, water_filled = false
+var water_y = 0.94
 var start_bubble = false
 var bubbles, bubble = []
 
@@ -101,7 +102,7 @@ var bread_clicked = false
 
 // order check
 var current_order							// current order name
-var customer_order_list = ["Steak","Sandwich","Noodle Soup"]	// list of orders possible
+var customer_order_list = ["Noodle Soup"]	// list of orders possible
 var current_order_requirements = []			// list of ingrediants needed from current order
 var food_in_plate = []						// ingrediants currently in plate
 var food_in_plate_name = []					// name of ingre currently in plate
@@ -113,7 +114,6 @@ var iscorrect_food = false
 var stove_click, boil, cut_tomato, food_to_plate, fridge_close, fridge_open, egg_cracking, eating
 var garbage, putting_cheese_on, sauce, switch_on, background_music, fry_oil, water_pouring
 
-var water_y = 0.94
 
 // ****************************** SETUP() ******************************
 // ---------------------------------------------------------------------
@@ -388,6 +388,29 @@ function setup() {
 		pot = new Interactables('pot_obj','pot_mtl',	-0.95,0.94,5.04,	0.008,0.01,0.008,	0,300,0,	-0.887,1.05, 4.975,	0.45,0.23,0.38,	"pot")
 		pan = new Interactables('pan_obj','pan_mtl',	-0.66,1,5.49,		1,1,1,				0,270,0,	-0.828,0.957,5.55, .61,0.2,.33,		"pan")
 
+		clearPotBtn = new Plane({
+			x:-0.528, y:0.94, z:4.947,
+			width:0.4, height:0.14,
+			rotationX:-128, rotationY:-80, rotationZ: 180,
+			red: 189, green: 183, blue:107,
+			clickFunction: function(thePlane){
+				clearPot()
+			}
+		})
+		clearPotBtn.tag.setAttribute('text','value: Clear Pot; color: rgb(0,0,0); align: center; width:1; height:1;');
+		world.add(clearPotBtn)
+
+		clearPanBtn = new Plane({
+			x:-0.438, y:0.94, z:5.467,
+			width:0.4, height:0.14,
+			rotationX:-128, rotationY:-80, rotationZ: 180,
+			red: 189, green: 183, blue:107,
+			clickFunction: function(thePlane){
+				clearPan()
+			}
+		})
+		clearPanBtn.tag.setAttribute('text','value: Clear Pan; color: rgb(0,0,0); align: center; width:1; height:1;');
+		world.add(clearPanBtn)
 
 	//  ******** PREPARATION AREA ********
 		// cutting board: interactable
@@ -522,7 +545,7 @@ function setup() {
 		shelf = new Objects('shelf_obj','shelf_mtl',0,0.84,3.64,0.99,0.63,0.72,0,0,0,"shelf")
 		// ketchup = new Objects('ketchup_obj','ketchup_mtl',-0.51,1,4.17,0.0003,0.0003,0.0003,0,60,0,"ketchup")
 		// trashCan =  new Objects('trashCan_obj','trashCan_mtl',0.28,0.112,4.979,0.002,0.002,0.002,0,0,0,"trashCan")
-		hotSauce =  new Objects('hotSauce_obj','hotSauce_mtl',-0.07,1.18,3.75,0.3,0.3,0.3,0,180,0,"hotSauce")
+		// hotSauce =  new Objects('hotSauce_obj','hotSauce_mtl',-0.07,1.18,3.75,0.3,0.3,0.3,0,180,0,"hotSauce")
 
 		// ingredients
 		// sandwich
@@ -559,16 +582,7 @@ function setup() {
 		// noodle 
 		egg = new Interactables('egg_obj', 'egg_mtl', 	0.037,0.991,5.87, 	0.001,0.001,0.001, 	-80,30,0,		0.037,1.03,5.87,	0.17,0.09,0.2, 	"egg")
 		bowl = new Objects('basket_obj','basket_mtl',	-0.172,1.042,5.899,		0.380,0.380,0.380,	0,0,0, "bowl")
-		noodle_box = new Box({
-			x:-0.172, y:1.03, z:5.912,
-			width:0.2, height:0.15, depth:0.23,
-			opacity: 0.6,
-			clickFunction: function(){
-				console.log("you clicked noodle")
-			}
-		})
-		// world.add(noodle_box)
-
+		
 		noodle = new Container3D({
 			x:-0.21, y:1.03, z:5.9,
 			rotationX:90, rotationZ:20
@@ -704,7 +718,6 @@ function draw() {
 	recipe_show_button.tag.setAttribute('text','value: '+recipe_detail+'; color: rgb(0,0,0); align: center;');
 	recipe_textholder.tag.setAttribute('text','value: '+recipe_detail+';color: rgb(0,0,0); align: center;');
 
-	// console.log(water_filled)
 }
 
 
@@ -945,15 +958,15 @@ function plateFunction(){
 					cooked_steak.utensil.setScale(0.14,0.05,0.12)
 					cooked_steak.utensil.show()
 
-					// clear pan_items
-					pan_item = undefined
-					pan_item_name = undefined
-
 					// add ingredient to the plate array
 					food_in_plate.push(cooked_steak)
 					food_in_plate_name.push("cooked steak")
 
 					world.add(cooked_steak)
+					
+					clearPan()
+					msg = "Message Board"
+
 
 				}
 				// ASPARAGUS
@@ -965,15 +978,14 @@ function plateFunction(){
 					cooked_asparagus.utensil.setScale(0.08,0.08,0.08)
 					cooked_asparagus.utensil.show()
 
-					// clear pan_items
-					pan_item = undefined
-					pan_item_name = undefined
-
 					// add ingredient to the plate array
 					food_in_plate.push(cooked_asparagus)
 					food_in_plate_name.push("cooked asparagus")
 
 					world.add(cooked_asparagus)
+
+					clearPan()
+					msg = "Message Board"
 
 				}
 
@@ -981,32 +993,24 @@ function plateFunction(){
 		}
 
 
-		// SHOW POT INGREIDNTS TO PLATE: "cooked egg","cooked noodle", "soup"
+		// SHOW POT INGREIDNTS TO PLATE: "noodle soup"
 		else if(pot_item_name == "cooked noodle" && pan_item_name == undefined && board_item_name == undefined){
 				// check if selected item is ALREADY in plate
 				if(checkPlateItems(pot_item_name)){
 					msg = "You already have this \n\n in the plate."
 				}else{
-					console.log("hello")
-					// noodle_container.setPosition(0.2,0,0)
-					// cooked_noodle.setPosition(0.5,0,0)
-					world.remove(cooked_noodle)
-					noodle_soup = new Objects('noodleSoup_obj','noodleSoup_mtl',	0.84,0.96,5.12,	0.03,0.03,0.03,	0,0,0,"noodle soup")
 
 					// noodle_soup
-
-					// clear variables
-					pot_item_name = undefined
-					pot_item = undefined
-					pot_has = []
+					noodle_soup = new Objects('noodleSoup_obj','noodleSoup_mtl',	0.84,0.96,5.12,	0.03,0.03,0.03,	0,0,0,"noodle soup")
 
 					// add to plate
 					food_in_plate.push(noodle_soup)
 					food_in_plate_name.push("noodle soup")
 
+					// clear pot
+					clearPot()
+
 					world.add(noodle_soup)
-
-
 
 				}
 		}
@@ -1058,23 +1062,28 @@ function potFunction(){
 
 					pot_has.push("noodle")
 
+					noodle_copy = new Container3D({
+
+					}) 
+
 					// create a copy of torus noodle and add to container
 					for (var i =0;i<4;i++){
-						var noodle_copy = new TorusKnot({
+						var pasta_copy = new TorusKnot({
 							x:-0.98+0.03*i, y:1+0.001*i, z:5.04,
 							width:0.1,	height:0.08, depth: 0.13,
 							red:244, green:188, blue:25,
 							scaleX:0.02, scaleY:0.02, scaleZ: 0.02,
 							rotationX:90+0.1+0.05*i, rotationY:0.1 +0.05*i, rotationZ:20+0.1+0.05*i,
 						})
-						noodle_container.addChild(noodle_copy)
+						noodle_copy.addChild(pasta_copy)
 					}
 
+					noodle_container.addChild(noodle_copy)
 				}
 
 				world.add(noodle_container)
 
-				cooked_noodle = noodle_container
+				// cooked_noodle = noodle_container
 				// pot_item = undefined
 
 				// is noodle ready to be cooked??
@@ -1122,27 +1131,25 @@ function panFunction(){
 
 		// put steak / asparagus on pan
 		if(pan_item_name == "steak"){
-			// display steak in pan
-			// needs to check if there is anything in pan *another function here
-			// if(selected_items_name == "pan"){
-
-			// }
-
+	
 			pan_item.setPosition(-0.869,0.969,5.549)
 			world.add(pan_item)
 
 			// sound effect for steak being cooked
-			msg= "Now Cooking...\n Please do not remove steak"
-			setTimeout(() => {
-				// sound effect for steak finished cooked
-
-				console.log("start cooking")
-				pan_item.hide()
-				pan_item = new Objects('steak_obj', 'steak_mtl', -0.88,0.96,5.554, 0.1,0.08,0.08,	0,0,0, "cooked steak")
-				cooked_steak = pan_item
-				pan_item_name = pan_item.name
-				msg= "Your steak is ready!"
-			}, 3000)
+			msg= "Now Cooking...\n Please do not remove/click steak"
+			
+			if(pan_item_name != undefined){
+				setTimeout(() => {
+					// sound effect for steak finished cooked
+					if(pan_item_name != undefined){
+						pan_item.hide()
+						pan_item = new Objects('steak_obj', 'steak_mtl', -0.88,0.96,5.554, 0.1,0.08,0.08,	0,0,0, "cooked steak")
+						cooked_steak = pan_item
+						pan_item_name = pan_item.name
+						msg= "Your steak is ready!"
+					}
+				}, 3000)
+			}
 		}
 		// selected cooked steak
 		else if(pan_item_name == "cooked steak"){
@@ -1156,11 +1163,10 @@ function panFunction(){
 			pan_item.setScale(0.06,0.06,0.06)
 			world.add(pan_item)
 
-			msg= "Now Cooking...\n Please do not remove asparagus"
+			msg= "Now Cooking...\n Please do not remove/click asparagus"
 
 			setTimeout(() => {
 				// sound effect for asparagus finished cooked
-				console.log("start cooking")
 				pan_item.hide()
 				pan_item = new Objects('aspara_obj', 'aspara_mtl', -0.9,0.968,5.497, 0.06,0.06,0.06,	0,-60,0, "cooked asparagus")
 				cooked_asparagus = pan_item
@@ -1184,7 +1190,6 @@ function panFunction(){
 function serveOrder(){
 	// clear plate
 	plateIngredientRemoval()
-	console.log("serveOrder function")
 
 	// score calculation
 	score += remaining_time * 3
@@ -1252,7 +1257,6 @@ function assemblePlate(){
 }
 
 function clearPlate(){
-	console.log(food_in_plate_name)
 	if(food_in_plate_name.length != 0){
 		// remove everything in the plate
 		plateIngredientRemoval()
@@ -1295,6 +1299,95 @@ function clearCuttingBoard(){
 	}
 }
 
+function clearPot(){
+
+	// if there are things in the pot
+	if(pot_has.length != 0){
+		// clear variables
+		pot_item_name = undefined
+		pot_item = undefined
+		noodle_cooked = false
+		noodle_ready_to_cook = false
+
+		for(let i=0; i < pot_has.length; i++){
+			if(pot_has[i] == "egg"){
+				noodle_container.removeChild(cooked_egg)
+			}
+			else if(pot_has[i] == "noodle"){
+				let torusKnots = noodle_copy.getChildren()
+				for(let i=0; i < torusKnots.length; i++){
+					noodle_copy.removeChild(torusKnots[i])
+				}
+				// world.remove(noodle_copy)
+
+			}
+			else if(pot_has[i] == "water"){
+				noodle_container.removeChild(water)
+			}
+		}
+		
+		// clear variables
+		// pot_item_name = undefined
+		// pot_item = undefined
+		// noodle_cooked = false
+		// noodle_ready_to_cook = false
+		pot_has = []
+
+		world.remove(cooked_egg)
+		world.remove(noodle_container)
+		world.remove(noodle_copy)
+
+
+	}else{
+		// clear variables
+		pot_item_name = undefined
+		pot_item = undefined
+		noodle_cooked = false
+		noodle_ready_to_cook = false
+		pot_has = []
+
+	}
+	console.log(pot_has)
+}
+
+function clearPan(){
+	console.log("clear pan function")
+
+	if(pan_item_name == "steak" ||pan_item_name == "asparagus"){
+		world.remove(pan_item)
+
+		// clear pan_items
+		pan_item = undefined
+		pan_item_name = undefined
+
+		msg = "Your pan is now empty"
+	}
+	else if(pan_item_name == "cooked steak"){
+		world.remove(cooked_steak.utensil)
+		
+		// clear pan_items
+		pan_item = undefined
+		pan_item_name = undefined
+
+		msg = "Your pan is now empty"
+	}
+	else if(pan_item_name == "cooked asparagus"){
+		world.remove(cooked_asparagus.utensil)
+		
+		// clear pan_items
+		pan_item = undefined
+		pan_item_name = undefined
+
+		msg = "Your pan is now empty"
+	}
+	else{
+		msg = "You have nothing in your pan"
+
+	}
+	
+
+
+}
 
 function plateIngredientRemoval(){
 	for(let i=0; i < food_in_plate.length; i++){
@@ -1359,6 +1452,7 @@ function cookNoodle(){
 	})
 	// world.add(water)
 	noodle_container.addChild(water)
+	pot_has.push("water")
 
 	// water filling animation in draw()
 	// add water sound
@@ -1725,7 +1819,7 @@ class Customer{
 
 				}
 				else{
-					msg = "The order is \n not ready"
+					msg = "The order is not ready or wrong \n If this is noodle \n Click assemble order"
 				}
 			}
 		})
