@@ -604,8 +604,8 @@ function setup() {
 
 
 		// var testOBJ = new OBJ({
-		// 	asset:'steak_raw_obj',
-		// 	mtl: 'steak_raw_mtl',
+		// 	asset:'noodleSoup_obj',
+		// 	mtl: 'noodleSoup_mtl',
 		// 	x:0, y:1, z:5,
 		// 	scaleX: 0.5, scaleY:0.5, scaleZ:0.5,
 		// 	// rotationX:0,
@@ -991,7 +991,7 @@ function plateFunction(){
 					// noodle_container.setPosition(0.2,0,0)
 					// cooked_noodle.setPosition(0.5,0,0)
 					world.remove(cooked_noodle)
-					noodle_soup = new Objects('sandwich_obj','sandwich_mtl',	0.81,1,5.12,	0.99,0.63,0.72,	0,90,-90,"noodle soup")
+					noodle_soup = new Objects('noodleSoup_obj','noodleSoup_mtl',	0.84,0.96,5.12,	0.03,0.03,0.03,	0,0,0,"noodle soup")
 
 					// noodle_soup
 
@@ -1216,7 +1216,7 @@ function assemblePlate(){
 		}
 		else if(current_order == "Steak"){
 
-			// no model for finished steak tehrefore just arrangement
+			// no model for finished steak therefore just arrangement
 			cooked_steak.utensil.hide()
 			cooked_asparagus.utensil.hide()
 
