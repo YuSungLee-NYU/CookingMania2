@@ -48,22 +48,26 @@ var ketchup, hotSauce
 // *************** Interactable Objects 2: ingredients (objects that can have actions implemented on)
 var tomato, tomato_slice, cheese, cheese_slice, lettuce, lettuce_shreds, bread
 var steak, cooked_steak, asparagus, cooked_asparagus
-var noodle, egg
 
-var noodle_clicked = false
-var pot_clicked = false
-var boiled = false
-var noodle_in_pot = false
-var water_filled = false
-var water
+var noodle, cooked_noodle, egg, cooked_egg, noodle_container, water
+var noodle_ready_to_cook = false, noodle_cooked = false
+var start_water = false, water_filled = false
+var start_bubble = false
+var bubbles, bubble = []
+
+// var noodle_clicked = false
+// var pot_clicked = false
+// var boiled = false
+// var noodle_in_pot = false
+// var water_filled = false
 var pasta1, pasta2, soup, egg1
-var bubble=[]
-var egg_clicked = false
-var egg_in_pot = false
-var noodle_prepared
-var noodle_finished = false
-var bubbled = false
-var plate_clicked = false
+// var bubble=[]
+// var egg_clicked = false
+// var egg_in_pot = false
+// var noodle_prepared
+// var noodle_finished = false
+// var bubbled = false
+// var plate_clicked = false
 
 
 
@@ -73,7 +77,7 @@ var sandwich, steak_complete, noodle_soup
 //*************** Decorative / Stationary Objects
 var _floor, counter, wall1, wall2, wall3, wall4, wall5, wall6
 var stove, fridgeBox, shelf
-var plant1, basket1, basket2, basket3
+var plant1, basket1, basket2, basket3,bowl
 
 //**************** Cutting board
 var board_item, board_item_name		// previously selected item for the cutting board ONLY
@@ -83,7 +87,7 @@ var pan_item, pan_item_name			// previously selected item for pan ONLY
 
 //********************* Pot
 var pot_item, pot_item_name			// previously selected item for pot ONLY
-
+var pot_has = []					// list of items in pot (can only hold noodle + egg)
 
 //************* Action field
 var holdingitem								// item that we are currently holding
@@ -97,7 +101,7 @@ var bread_clicked = false
 
 // order check
 var current_order							// current order name
-var customer_order_list = []				// list of orders possible
+var customer_order_list = ["Steak","Sandwich","Noodle Soup"]	// list of orders possible
 var current_order_requirements = []			// list of ingrediants needed from current order
 var food_in_plate = []						// ingrediants currently in plate
 var food_in_plate_name = []					// name of ingre currently in plate
@@ -109,7 +113,7 @@ var iscorrect_food = false
 var stove_click, boil, cut_tomato, food_to_plate, fridge_close, fridge_open, egg_cracking, eating
 var garbage, putting_cheese_on, sauce, switch_on, background_music, fry_oil, water_pouring
 
-
+var water_y = 0.94
 
 // ****************************** SETUP() ******************************
 // ---------------------------------------------------------------------
@@ -279,9 +283,6 @@ function setup() {
 	current_customer.add_to_world()
 
 	//**************** ORDER ****************
-	// customer_order_list = ["Steak", "Noodle Soup","Sandwich"]
-	customer_order_list = ["Steak","Sandwich"]
-
 	set_random_customer_order()
 
 
@@ -384,8 +385,8 @@ function setup() {
 		world.add(stove)
 
 		
-		pot = new Objects('pot_obj','pot_mtl',-0.95,0.94,5.04,0.008,0.01,0.008,0,300,0,"pot")
-		pan = new Interactables('pan_obj','pan_mtl',	-0.66,1,5.49,	1,1,1,	0,270,0,	-0.828,0.957,5.55, .61,0.2,.33,	"pan")
+		pot = new Interactables('pot_obj','pot_mtl',	-0.95,0.94,5.04,	0.008,0.01,0.008,	0,300,0,	-0.887,1.05, 4.975,	0.45,0.23,0.38,	"pot")
+		pan = new Interactables('pan_obj','pan_mtl',	-0.66,1,5.49,		1,1,1,				0,270,0,	-0.828,0.957,5.55, .61,0.2,.33,		"pan")
 
 
 	//  ******** PREPARATION AREA ********
@@ -517,17 +518,17 @@ function setup() {
 
 
 	// ******** SPICE SHELF ********
-		// spice shelf
+		// shelf
 		shelf = new Objects('shelf_obj','shelf_mtl',0,0.84,3.64,0.99,0.63,0.72,0,0,0,"shelf")
 		// ketchup = new Objects('ketchup_obj','ketchup_mtl',-0.51,1,4.17,0.0003,0.0003,0.0003,0,60,0,"ketchup")
 		// trashCan =  new Objects('trashCan_obj','trashCan_mtl',0.28,0.112,4.979,0.002,0.002,0.002,0,0,0,"trashCan")
 		hotSauce =  new Objects('hotSauce_obj','hotSauce_mtl',-0.07,1.18,3.75,0.3,0.3,0.3,0,180,0,"hotSauce")
 
-		// ingrediants
+		// ingredients
+		// sandwich
 		bread = new Interactables('bread_obj','bread_mtl',		-1.13,1,4.276,	1,1,1,	-80,30,0,	 -1.13,1,4.276,0.27,0.08,0.28,	"bread")
 		tomato= new Interactables('tomato_obj','tomato_mtl',	-0.5,1.45,3.64,	0.005,0.005,0.005,	-90,0,0, -0.5,1.45,3.64,0.3,0.3,0.3,	"tomato")
-		lettuce = new Interactables('lettuce_obj', 'lettuce_mtl', 	-0.17,1.114,5.91,	0.03,0.03,0.03,	0,0,0,	 -0.18,1.184,5.90,0.14,0.14,0.15,	"lettuce")
-
+		lettuce = new Interactables('lettuce_obj', 'lettuce_mtl', 	-0.18,1.114,5.91,	0.03,0.03,0.03,	0,0,0,	 -0.17,1.224,5.90,0.14,0.1,0.15,	"lettuce")
 		cheese = new Box({
 			x:0.072, y:1.387, z:5.97,
 			width:0.1,	height:0.08, depth: 0.13,
@@ -551,8 +552,54 @@ function setup() {
 		})
 		world.add(cheese)
 
+		// steak
 		steak = new Interactables('steak_raw_obj','steak_raw_mtl',	0,1.187,5.95,	0.5,0.5,0.5,	-0,0,0,  0,1.197,5.97,	0.2,0.05,0.29,	"steak")
 		asparagus = new Interactables('aspara_obj','aspara_mtl',	-0.2,1.387,5.97,	0.07,0.07,0.07,	-0,-60,0, -0.2,1.387,5.97,	0.2,0.05,0.29,	"asparagus")
+
+		// noodle 
+		egg = new Interactables('egg_obj', 'egg_mtl', 	0.037,0.991,5.87, 	0.001,0.001,0.001, 	-80,30,0,		0.037,1.03,5.87,	0.17,0.09,0.2, 	"egg")
+		bowl = new Objects('basket_obj','basket_mtl',	-0.172,1.042,5.899,		0.380,0.380,0.380,	0,0,0, "bowl")
+		noodle_box = new Box({
+			x:-0.172, y:1.03, z:5.912,
+			width:0.2, height:0.15, depth:0.23,
+			opacity: 0.6,
+			clickFunction: function(){
+				console.log("you clicked noodle")
+			}
+		})
+		// world.add(noodle_box)
+
+		noodle = new Container3D({
+			x:-0.21, y:1.03, z:5.9,
+			rotationX:90, rotationZ:20
+		})
+		world.add(noodle)
+		
+		for (var i =0;i<4;i++){
+			var pasta = new TorusKnot({
+				x:0.03*i, y:0.001*i, z:0,
+				width:0.1,	height:0.08, depth: 0.13,
+				red:244, green:188, blue:25,
+				scaleX:0.02, scaleY:0.02, scaleZ: 0.02,
+				rotationX:0.1+0.05*i, rotationY:0.1 +0.05*i, rotationZ:0.1+0.05*i,
+				clickFunction: function(theBox) {
+					console.log("NOODLE!");
+		
+					// disable previous other varibales to prevent conflict
+					bread_clicked = false
+
+					// update selected item 
+					selected_items_name = "noodle"
+					// and directly update pot_item_name
+					pot_item_name = "noodle"
+				}
+			})
+			noodle.add(pasta)
+		}
+
+		bubbles= new Bubbles(-0.95,0.94,5.04)
+		bubble.push(bubbles,bubbles,bubbles,bubbles,bubbles)
+	
 
 
 
@@ -569,7 +616,6 @@ function setup() {
 
 		// ******** DECORATIONS ********
 		// plant1 = new Objects('plant1_obj','plant1_mtl',			1.26,0.88,4.24,		0.1,0.1,0.1,	0,0,0)
-		// var basket1 = new Objects('basket_obj','basket_mtl',	-0.86,1,4.48,		0.5,0.5,0.5,	0,0,0)
 		// var basket2 = new Objects('basket_obj','basket_mtl',	-0.72,1,4.27,		0.5,0.5,0.5,	0,0,0)
 		// var basket3 = new Objects('basket_obj','basket_mtl',	-0.58,1,4.05,		0.5,0.5,0.5,	0,0,0)
 		//
@@ -614,6 +660,33 @@ function draw() {
 		holdingitem.setY(map(mouseY,0,windowHeight,-0.5,0.5) * -1)
 	}
 
+	// Bubble Effects:
+	// if (start_bubble){
+		// for (var i = 0; i < bubble.length; i++) {
+		// 	bubble[i].move()
+		// }
+		// start_bubble = false
+	// }
+
+	// check if noodle is ready
+	if(noodle_ready_to_cook){
+		console.log("yes ready!!")
+		cookNoodle()
+		noodle_ready_to_cook = false
+	}
+
+	// is water filled?
+	if(start_water){
+
+		if(water.y != 1){
+			water_y += 0.001
+		}else{
+			water.y = 1
+			start_water = false
+			water_filled = true
+		}
+		water.setY(water_y)
+	}
 
 	// update selection UI
 	if(selected_items_name == undefined ){
@@ -631,6 +704,7 @@ function draw() {
 	recipe_show_button.tag.setAttribute('text','value: '+recipe_detail+'; color: rgb(0,0,0); align: center;');
 	recipe_textholder.tag.setAttribute('text','value: '+recipe_detail+';color: rgb(0,0,0); align: center;');
 
+	// console.log(water_filled)
 }
 
 
@@ -640,6 +714,7 @@ function draw() {
 function set_random_customer_order(){
 	// pick a random order from customer order_list
 	clearPlate()
+	msg = "Message Board"
 	current_order = random(customer_order_list);
 
 	// order ingredients
@@ -647,8 +722,8 @@ function set_random_customer_order(){
 		current_order_requirements = ["cooked steak","cooked asparagus"]
 	}else if (current_order == "Sandwich"){
 		current_order_requirements = ["tomato slice", "lettuce shreds", "bread", "cheese slice"]
-	}else if (current_order == "Noodles"){
-		current_order_requirements = ["cooked egg","cooked noodle", "soup"]
+	}else if (current_order == "Noodle Soup"){
+		current_order_requirements = ["noodle soup"]
 	}
 
 	// update recipe detail based on order
@@ -656,7 +731,7 @@ function set_random_customer_order(){
 		recipe_detail =  "Current Order: Steak \n\n 1. Take out meat from fridge \n\n 2. Grill it on pan \n\n 3. Place grilled steak on plate \n\n 4. Take out asparagus from fridge \n\n 5. Place asparagus on the pan \n\n 6. Place asparagus in the Plate \n\n 7. Assemble the order \n\n 8. Serve the order"
 	}
 	// ** Suggestion: change or remove noodle to sth else, maybe a drink??
-	else if(current_order == "Noodle"){
+	else if(current_order == "Noodle Soup"){
 		recipe_detail = "Noodles Instruction Here"
 	}
 	else if(current_order == "Sandwich"){
@@ -668,10 +743,10 @@ function set_random_customer_order(){
 
 }
 
-// Recipe Function ----------
 // checks whether the ingridents are correct
 function check_recipe(){
 	console.log("check recipe")
+	console.log(food_in_plate_name)
 
 	// if no food in plate
 	if(food_in_plate_name.length == 0){
@@ -697,7 +772,6 @@ function check_recipe(){
 		return true
 	}
 }
-
 
 // this function checks if given ingredient is already in plate
 function checkPlateItems(ingredient){
@@ -727,9 +801,23 @@ function checkPlateToRecipe(ingredient){
 
 }
 
+function checkPotItems(ingredient){
+	if(pot_has.length == 0){
+		return false
+	}
+	else{
+		for(let i=0; i < pot_has.length; i++){
+			if(ingredient == pot_has[i]){
+				return true
+			}
+		}
+		return false
+	}
+}
 
 function plateFunction(){
 	// selected_items_name in this function is ALWAYS = PLATE
+	// console.log(pot_item_name)
 
 	// if user has selected an item/ aka the plate
 	if(selected_items != undefined){
@@ -752,7 +840,7 @@ function plateFunction(){
 
 		// user did not select anything previously
 		// clicking dish will check what is still lacking in terms of ingrediants
-		if(board_item_name == undefined && bread_clicked == false && pan_item_name == undefined){
+		if(board_item_name == undefined && bread_clicked == false && pan_item_name == undefined && pot_item_name == undefined){
 
 			// Display what user still needs
 			// if there is nothing in plate
@@ -784,7 +872,7 @@ function plateFunction(){
 
 			// check if selected item is ALREADY in plate
 			if(checkPlateItems(board_item_name)){
-				msg = "You have already \n put this item \n in the plate."
+				msg = "You already have this \n\n in the plate."
 			}
 			else{
 				//TOMATO SLICE ------
@@ -846,7 +934,7 @@ function plateFunction(){
 
 			// check if selected item is ALREADY in plate
 			if(checkPlateItems(pan_item_name)){
-				msg = "You have already \n put this item \n in the plate."
+				msg = "You already have this \n\n in the plate."
 			}else{
 				// STEAK
 				if(pan_item_name == "cooked steak"){
@@ -894,16 +982,38 @@ function plateFunction(){
 
 
 		// SHOW POT INGREIDNTS TO PLATE: "cooked egg","cooked noodle", "soup"
-		// else if(pot_item_name != undefined && pan_item_name == undefined && board_item_name == undefined){
-				// // check if selected item is ALREADY in plate
-				// if(checkPlateItems(pot_item_name)){
-				// 	msg = "You have already \n put this item \n in the plate."
-				// }
-		// }
+		else if(pot_item_name == "cooked noodle" && pan_item_name == undefined && board_item_name == undefined){
+				// check if selected item is ALREADY in plate
+				if(checkPlateItems(pot_item_name)){
+					msg = "You already have this \n\n in the plate."
+				}else{
+					console.log("hello")
+					// noodle_container.setPosition(0.2,0,0)
+					// cooked_noodle.setPosition(0.5,0,0)
+					world.remove(cooked_noodle)
+					noodle_soup = new Objects('sandwich_obj','sandwich_mtl',	0.81,1,5.12,	0.99,0.63,0.72,	0,90,-90,"noodle soup")
+
+					// noodle_soup
+
+					// clear variables
+					pot_item_name = undefined
+					pot_item = undefined
+					pot_has = []
+
+					// add to plate
+					food_in_plate.push(noodle_soup)
+					food_in_plate_name.push("noodle soup")
+
+					world.add(noodle_soup)
+
+
+
+				}
+		}
 
 
 		else if(pan_item_name != undefined && board_item_name != undefined){
-			msg="Please clear your cutting board items first"
+			msg="Please only do \n\n one dish at a time"
 		}
 
 
@@ -912,6 +1022,93 @@ function plateFunction(){
 
 
 
+
+}
+
+function potFunction(){
+
+	// only activate when noodle is not cooked
+	if(!noodle_cooked && !noodle_ready_to_cook){
+
+	// check if user has selected item appropriate to pan
+		if (pot_item_name == "noodle" || pot_item_name == "egg"){
+
+			// check if there is anything in pot 
+			if(!checkPotItems(pot_item_name)){
+
+				// container for noodle
+				noodle_container = new Container3D({
+					// blank
+				})
+
+				// you have to cook both egg and noodles TOGETHER
+				// for egg
+				if(pot_item_name == "egg"){
+
+					pot_has.push("egg")
+
+					// add egg
+					cooked_egg = pot_item
+					cooked_egg.setPosition(-0.96,1,4.975)
+					noodle_container.addChild(cooked_egg)
+				}
+
+				// for noodle
+				if(pot_item_name == "noodle"){
+
+					pot_has.push("noodle")
+
+					// create a copy of torus noodle and add to container
+					for (var i =0;i<4;i++){
+						var noodle_copy = new TorusKnot({
+							x:-0.98+0.03*i, y:1+0.001*i, z:5.04,
+							width:0.1,	height:0.08, depth: 0.13,
+							red:244, green:188, blue:25,
+							scaleX:0.02, scaleY:0.02, scaleZ: 0.02,
+							rotationX:90+0.1+0.05*i, rotationY:0.1 +0.05*i, rotationZ:20+0.1+0.05*i,
+						})
+						noodle_container.addChild(noodle_copy)
+					}
+
+				}
+
+				world.add(noodle_container)
+
+				cooked_noodle = noodle_container
+				// pot_item = undefined
+
+				// is noodle ready to be cooked??
+				if(pot_has.length == 2){
+					// set cook ready = true; jump to cookNoodle()
+					noodle_ready_to_cook = true
+					pot_item_name = "Cooking Noodle"
+					selected_items_name = "Cooking Noodle"
+				}
+
+			}
+			else{
+				msg="You already have \n\n "+ pot_item_name + " in the pot"
+			}
+
+		}
+		else if(board_item_name != undefined || pan_item_name != undefined){
+			msg="Cooking pot is only \n\n for noodles and eggs"
+		}
+		
+		if(pot_has.length == 2){
+			msg = "The noodle has not been cooked"
+		}
+	}
+	else if(noodle_ready_to_cook){
+		msg = "Please wait ... \n\n Now Cooking"
+	}
+	// if noodle has been cooked
+	else if(noodle_cooked){
+
+		selected_items_name = "cooked noodle"
+		pot_item_name = "cooked noodle"
+
+	}
 
 }
 
@@ -926,9 +1123,10 @@ function panFunction(){
 		// put steak / asparagus on pan
 		if(pan_item_name == "steak"){
 			// display steak in pan
-			if(selected_items_name == "pan"){
+			// needs to check if there is anything in pan *another function here
+			// if(selected_items_name == "pan"){
 
-			}
+			// }
 
 			pan_item.setPosition(-0.869,0.969,5.549)
 			world.add(pan_item)
@@ -1036,6 +1234,9 @@ function assemblePlate(){
 			// food_in_plate.push(sandwich)
 			// food_in_plate_name.push("sandwich")
 		}
+		else if(current_order == "Noodle Soup"){
+			msg = "Your noodle is ready! "
+		}
 
 		iscorrect_food = true
 
@@ -1051,7 +1252,7 @@ function assemblePlate(){
 }
 
 function clearPlate(){
-
+	console.log(food_in_plate_name)
 	if(food_in_plate_name.length != 0){
 		// remove everything in the plate
 		plateIngredientRemoval()
@@ -1145,9 +1346,93 @@ function knifeMovement(){
 	}
 }
 
+function cookNoodle(){
+	// sound effect for boiling noodle	
+	msg= "Please wait ... \n\n Now Cooking Noodle"
+
+	// add water
+	water = new Circle({
+		x:-0.95, y:0.94, z:5.04,
+		red:175, green:238, blue:238,
+		radius: 0.11,
+		rotationX: -90,rotationY: 90,
+	})
+	// world.add(water)
+	noodle_container.addChild(water)
+
+	// water filling animation in draw()
+	// add water sound
+
+	if(!water_filled){
+		start_water = true
+	}
+
+	setTimeout(() => {
+		if(water_filled){
+			console.log("water filled, start boiling")
+			// add water to container
+			water.setY(1)
+		}
+
+		// start boiling
+		// start_bubble = true
+
+		// setTimeout(() => {
+		// 	start_bubble = false
+		// finished boiling! 
+			noodle_cooked = true
+			msg ="The Noodle is Ready"
+			// user will now click the pot again
+		// }, 5000);
+	}, 2000)
+	console.log()
+
+
+}
 
 // ****************************** CLASSES ******************************
 // ---------------------------------------------------------------------
+class Bubbles{
+
+	constructor(x,y,z) {
+
+		this.myBox = new Sphere({
+			x:x+random(0.035, 0.045), y:y-0.2+random(0.15, 0.22), z:z+random(0.01, 0.05),
+			red: 255, green:230, blue:random(170,180),
+			radius: 0.015
+		});
+
+		world.add(this.myBox);
+
+		this.xOffset = random(1000);
+		this.zOffset = random(2000, 3000);
+	}
+
+	move() {
+
+		var yMovement = 0.001;
+		var xMovement = map( noise(this.xOffset), 0, 1, -0.001, 0.001);
+		var zMovement = map( noise(this.zOffset), 0, 1, -0.001, 0.001);
+
+		this.xOffset += 0.01;
+		this.yOffset += 0.01;
+
+
+		this.myBox.nudge(xMovement, yMovement, zMovement);
+
+		var boxScale = this.myBox.getScale();
+		this.myBox.setScale( boxScale.x-0.0025, boxScale.y-0.0025, boxScale.z-0.0025);
+
+		if (boxScale.x <= 0) {
+			world.remove(this.myBox);
+			return "gone";
+		}
+		else {
+			return "ok";
+		}
+	}
+}
+
 class Fridge {
 
 	constructor(){
@@ -1338,8 +1623,15 @@ class Interactables {
 						pan_item = selected_items
 						pan_item_name = selected_items_name
 					}
+					else if(selected_items_name == "egg"){
+						pot_item = selected_items
+						pot_item_name = selected_items_name
+					}
 					else if(selected_items_name == "pan"){
 						panFunction()
+					}
+					else if(selected_items_name == "pot"){
+						potFunction()
 					}
 					else{
 						bread_clicked = false
