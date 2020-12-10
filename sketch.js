@@ -101,13 +101,51 @@ var iscorrect_food = false
 
 
 //************* Sound Files
-var stove_click, boil, cut_tomato, food_to_plate, fridge_close, fridge_open, egg_cracking, eating
-var garbage, putting_cheese_on, sauce, switch_on, background_music, fry_oil, water_pouring
+// var stove_click, boil, cut_tomato, food_to_plate, fridge_close, fridge_open, egg_cracking, eating
+// var garbage, putting_cheese_on, sauce, switch_on
+
+var boilSound, food_to_plate_sound,fridge_close,fridge_open,egg_cracking,eating,waterSound, frySound, assembleSound, placeFoodSound
+var selectedSound, deselectSound, clearSound,cutSound, cutCheeseSound, errorSound, new_customer_sound, clearSound
+var background_music,openRecipeSound,closeRecipeSound,finishSound, kickOutSound
+
+
+
+// ****************************** PRELOAD() ******************************
+//preload sounds
+function preload(){
+	background_music = loadSound("resources/sounds/background_music.wav")
+	selectedSound = loadSound("resources/sounds/selected1.wav")
+	deselectSound = loadSound("resources/sounds/deselect.wav")
+	boilSound = loadSound("resources/sounds/boil.wav")
+	cutSound = loadSound("resources/sounds/cutting_cheese.wav")
+	cutCheeseSound = loadSound("resources/sounds/cut_tomato.wav")
+	errorSound = loadSound("resources/sounds/error.wav")
+	fridge_close = loadSound("resources/sounds/fridge_close.wav")
+	fridge_open = loadSound("resources/sounds/fridge_open.wav")
+	clearSound = loadSound("resources/sounds/clear.wav")
+	assembleSound = loadSound("resources/sounds/assemble.wav")
+	new_customer_sound = loadSound("resources/sounds/new_cus.wav")
+	frySound = loadSound("resources/sounds/fry_oil.wav")
+	waterSound = loadSound("resources/sounds/water.wav")
+	egg_cracking = loadSound("resources/sounds/egg_cracking.wav")
+	eating = loadSound("resources/sounds/eating.mp3")
+	serveSound = loadSound("resources/sounds/serveSound.wav")
+	placeFoodSound = loadSound("resources/sounds/food_to_plate.wav")
+	openRecipeSound = loadSound("resources/sounds/open_recipe.wav")
+	closeRecipeSound = loadSound("resources/sounds/close_recipe.wav")
+	finishSound = loadSound("resources/sounds/finishSound.wav")
+	kickOutSound  = loadSound("resources/sounds/kickOutSound.wav")
+}
+
+
 
 
 // ****************************** SETUP() ******************************
 // ---------------------------------------------------------------------
 function setup() {
+	background_music.loop()
+
+
 	noCanvas();
 	world = new World('VRScene');
 
@@ -125,7 +163,10 @@ function setup() {
 		rotationX: -40, rotationY: -40,
 		clickFunction: function(me){
 
-			console.log("Show Receipe");
+			if (openRecipeSound.isPlaying()==false){
+				openRecipeSound.play()
+			}			
+			
 			recipe_textholder.show()
 			recipe_close_button.show()
 			recipe_container.setY(0)
@@ -159,7 +200,10 @@ function setup() {
 		transparent:true,
 		clickFunction: function(me){
 
-			console.log("close Recipe");
+			if (closeRecipeSound.isPlaying()==false){
+				closeRecipeSound.play()
+			}
+
 			recipe_textholder.hide()
 			recipe_close_button.hide()
 
@@ -199,13 +243,19 @@ function setup() {
 				console.log("Clear Selection!")
 
 				if(knife_clicked){
+
 					knife_clicked = false
 					knifeMovement()
 				}
 				else{
+
 					selected_items = undefined
 					selected_items_name = undefined
 				}
+				if (deselectSound.isPlaying()==false){
+					deselectSound.play()
+				}
+
 				bread_clicked = false
 
 			}
@@ -311,6 +361,10 @@ function setup() {
 			rotationX:-128, rotationY:90, rotationZ: 180,
 			red: 189, green: 183, blue:107,
 			clickFunction: function(thePlane){
+				if (clearSound.isPlaying()==false){
+					clearSound.play()
+				}
+
 				clearPlate()
 			}
 		})
@@ -323,7 +377,6 @@ function setup() {
 			rotationX:-128, rotationY:90, rotationZ: 180,
 			red: 189, green: 183, blue:107,
 			clickFunction: function(thePlane){
-				console.log("Assemble Order")
 				assemblePlate()
 			}
 		})
@@ -433,16 +486,22 @@ function setup() {
 								}else{
 									board_item.setPosition(theBox.x,theBox.y,theBox.z)
 								}
+
+								if (placeFoodSound.isPlaying()==false){
+									placeFoodSound.play()
+								}
 							}
 							// msg = "Message Board"
-						}else{
-							// msg = "An item is \n already on \n the cutting board"
 						}
 					}else{
 						// iniate the animation of cutting
 						
 						// tomato - show tomato slice
 						if(board_item_name == "tomato"){
+							if (cutSound.isPlaying()==false){
+								cutSound.play()
+							}
+
                             // hide state before cutting
                             board_item.hide()
                             // substitute the product
@@ -451,11 +510,10 @@ function setup() {
 							board_item_name = board_item.name
 							board_item.show()
 
-							console.log("tomato slice")
+						
 						}
 						// cheese - show cheese slice
 						else if(board_item_name == "cheese"){
-							console.log(board_item)
 							// hide state before cutting & substitute the product
 							board_item.hide()
 							cheese_slice  = new Box({
@@ -466,18 +524,23 @@ function setup() {
 							world.add(cheese_slice)
 							board_item_name = "cheese slice"
 
-							console.log("cheese slice")
-
+							if (cutCheeseSound.isPlaying()==false){
+								cutCheeseSound.play()
+							}
 						}
 						// lettuce - show lettuce shreads
 						else if(board_item_name == "lettuce"){
+							if (cutCheeseSound.isPlaying()==false){
+								cutCheeseSound.play()
+							}	
+
 							board_item.hide()
 							board_item = new Objects('lettuceShreds_obj', 'lettuceShreds_mtl', 0,1.05,4.28, 0.07,0.07,0.07,	0,0,0, "lettuce shreds")
 							lettuce_shreds = board_item
 							board_item_name = "lettuce shreds"
 							board_item.show()
 
-							console.log("lettuce shreds")
+											
 						}
 						else{
 							msg = "There is nothing \n there to cut"
@@ -491,6 +554,10 @@ function setup() {
                     // board_item defines what was previously on the board
 					if(board_item != undefined){
 						// if so, selected item becomes the previously saved item
+						if (selectedSound.isPlaying()==false){
+							selectedSound.play()
+						}
+
 						selected_items = board_item
 						selected_items_name = board_item_name
 					}
@@ -511,6 +578,9 @@ function setup() {
 			clickFunction: function(thePlane){
 				console.log("Clear Items")
 				clearCuttingBoard()
+				if (clearSound.isPlaying()==false){
+					clearSound.play()
+				}
 			}
 		})
 		clearBoardBtn.tag.setAttribute('text','value: Clear Cutting Board; color: rgb(0,0,0); align: center; width:0.7; height:0.7;');
@@ -548,6 +618,10 @@ function setup() {
 					red:244, green:208, blue:63,
 				})
 
+				if (selectedSound.isPlaying()==false){
+					selectedSound.play()
+				}
+				
 				selected_items_name = "cheese"
 
 				// Go to Cutting board now
@@ -565,7 +639,7 @@ function setup() {
 		
 		noodle = new Container3D({
 			x:-0.21, y:1.03, z:5.9,
-			rotationX:90, rotationZ:20
+			rotationX:90, rotationZ:20,
 		})
 		world.add(noodle)
 		
@@ -577,7 +651,6 @@ function setup() {
 				scaleX:0.02, scaleY:0.02, scaleZ: 0.02,
 				rotationX:0.1+0.05*i, rotationY:0.1 +0.05*i, rotationZ:0.1+0.05*i,
 				clickFunction: function(theBox) {
-					console.log("NOODLE!");
 		
 					// disable previous other varibales to prevent conflict
 					bread_clicked = false
@@ -586,6 +659,10 @@ function setup() {
 					selected_items_name = "noodle"
 					// and directly update pot_item_name
 					pot_item_name = "noodle"
+
+					if (selectedSound.isPlaying()==false){
+						selectedSound.play()
+					}
 				}
 			})
 			noodle.add(pasta)
@@ -680,6 +757,10 @@ function draw() {
 			water_filled = true
 		}
 		water.setY(water_y)
+
+		if (waterSound.isPlaying()==false){
+			waterSound.play()
+		}
 	}
 
 	// update selection UI
@@ -738,7 +819,6 @@ function set_random_customer_order(){
 
 // checks whether the ingridents are correct
 function check_recipe(){
-	console.log("check recipe")
 	console.log(food_in_plate_name)
 	console.log(current_order_requirements)
 
@@ -830,7 +910,15 @@ function plateFunction(){
 
 				food_in_plate.push(new_bread)
 				food_in_plate_name.push(new_bread.name)
+
+				if (placeFoodSound.isPlaying()==false){
+					placeFoodSound.play()
+				}
+
 			}else{
+				if (errorSound.isPlaying()==false){
+					errorSound.play()
+				}
 				msg = "You already have \n bread in the plate"
 			}
 		}
@@ -839,6 +927,9 @@ function plateFunction(){
 		// clicking dish will check what is still lacking in terms of ingrediants
 		if(board_item_name == undefined && bread_clicked == false && pan_item_name == undefined && pot_item_name == undefined){
 
+			if (errorSound.isPlaying()==false){
+				errorSound.play()
+			}
 			// Display what user still needs
 			// if there is nothing in plate
 			if(food_in_plate_name.length == 0){
@@ -869,6 +960,10 @@ function plateFunction(){
 
 			// check if selected item is ALREADY in plate
 			if(checkPlateItems(board_item_name)){
+				if (errorSound.isPlaying()==false){
+					errorSound.play()
+				}
+
 				msg = "You already have this \n\n in the plate."
 			}
 			else{
@@ -882,6 +977,10 @@ function plateFunction(){
 					// clear board_item
 					board_item = undefined
 					board_item_name = undefined
+
+					if (placeFoodSound.isPlaying()==false){
+						placeFoodSound.play()
+					}
 
 					// add ingredient to the plate array
 					food_in_plate.push(tomato_slice)
@@ -900,6 +999,10 @@ function plateFunction(){
 					board_item = undefined
 					board_item_name = undefined
 
+					if (placeFoodSound.isPlaying()==false){
+						placeFoodSound.play()
+					}
+
 					food_in_plate.push(cheese_slice)
 					food_in_plate_name.push("cheese slice")
 				}
@@ -914,6 +1017,10 @@ function plateFunction(){
 					// clear board_item
 					board_item = undefined
 					board_item_name = undefined
+
+					if (placeFoodSound.isPlaying()==false){
+						placeFoodSound.play()
+					}
 
 					// add ingredient to the plate array
 					food_in_plate.push(lettuce_shreds)
@@ -931,6 +1038,9 @@ function plateFunction(){
 
 			// check if selected item is ALREADY in plate
 			if(checkPlateItems(pan_item_name)){
+				if (errorSound.isPlaying()==false){
+					errorSound.play()
+				}
 				msg = "You already have this \n\n in the plate."
 			}else{
 				// STEAK
@@ -945,6 +1055,10 @@ function plateFunction(){
 					// clear pan_items
 					pan_item = undefined
 					pan_item_name = undefined
+
+					if (placeFoodSound.isPlaying()==false){
+						placeFoodSound.play()
+					}
 
 					// add ingredient to the plate array
 					food_in_plate.push(cooked_steak)
@@ -971,6 +1085,9 @@ function plateFunction(){
 					pan_item = undefined
 					pan_item_name = undefined
 
+					if (placeFoodSound.isPlaying()==false){
+						placeFoodSound.play()
+					}
 					// add ingredient to the plate array
 					food_in_plate.push(cooked_asparagus)
 					food_in_plate_name.push("cooked asparagus")
@@ -992,11 +1109,19 @@ function plateFunction(){
 		else if(pot_item_name == "cooked noodle" && pan_item_name == undefined && board_item_name == undefined){
 				// check if selected item is ALREADY in plate
 				if(checkPlateItems(pot_item_name)){
+					if (errorSound.isPlaying()==false){
+						errorSound.play()
+					}
+
 					msg = "You already have this \n\n in the plate."
 				}else{
 
 					// noodle_soup
 					noodle_soup = new Objects('noodleSoup_obj','noodleSoup_mtl',	0.84,0.96,5.12,	0.03,0.03,0.03,	0,0,0,"noodle soup")
+					
+					if (placeFoodSound.isPlaying()==false){
+						placeFoodSound.play()
+					}
 
 					// add to plate
 					food_in_plate.push(noodle_soup)
@@ -1012,6 +1137,9 @@ function plateFunction(){
 
 
 		else if(pan_item_name != undefined && board_item_name != undefined){
+			if (errorSound.isPlaying()==false){
+				errorSound.play()
+			}
 			msg="Please only do \n\n one dish at a time"
 		}
 
@@ -1050,6 +1178,10 @@ function potFunction(){
 					cooked_egg = pot_item
 					cooked_egg.setPosition(-0.96,1,4.975)
 					noodle_container.addChild(cooked_egg)
+
+					if (egg_cracking.isPlaying()==false){
+						egg_cracking.play()
+					}	
 				}
 
 				// for noodle
@@ -1074,12 +1206,12 @@ function potFunction(){
 					}
 
 					noodle_container.addChild(noodle_copy)
+					if (placeFoodSound.isPlaying()==false){
+						placeFoodSound.play()
+					}	
 				}
 
 				world.add(noodle_container)
-
-				// cooked_noodle = noodle_container
-				// pot_item = undefined
 
 				// is noodle ready to be cooked??
 				if(pot_has.length == 2){
@@ -1091,24 +1223,45 @@ function potFunction(){
 
 			}
 			else{
+				// error sound
+				if (errorSound.isPlaying()==false){
+					errorSound.play()
+				}
+
 				msg="You already have \n\n "+ pot_item_name + " in the pot"
 			}
 
 		}
 		else if(board_item_name != undefined || pan_item_name != undefined){
+			// error sound
+			if (errorSound.isPlaying()==false){
+				errorSound.play()
+			}
+
 			msg="Cooking pot is only \n\n for noodles and eggs"
 		}
 		
 		if(pot_has.length == 2){
+			// error sound
+			if (errorSound.isPlaying()==false){
+				errorSound.play()
+			}
+
 			msg = "The noodle has not been cooked"
 		}
 	}
 	else if(noodle_ready_to_cook){
+		if (errorSound.isPlaying()==false){
+			errorSound.play()
+		}
+
 		msg = "Please wait ... \n\n Now Cooking"
 	}
 	// if noodle has been cooked
 	else if(noodle_cooked){
-
+		if (selectedSound.isPlaying()==false){
+			selectedSound.play()
+		}
 		selected_items_name = "cooked noodle"
 		pot_item_name = "cooked noodle"
 
@@ -1133,21 +1286,37 @@ function panFunction(){
 			// sound effect for steak being cooked
 			msg= "Now Cooking...\n Please do not remove/click steak"
 			
+			if (frySound.isPlaying()==false){
+				frySound.play()
+			}	
+
 			if(pan_item_name != undefined){
 				setTimeout(() => {
 					// sound effect for steak finished cooked
 					if(pan_item_name != undefined){
+				
 						pan_item.hide()
 						pan_item = new Objects('steak_obj', 'steak_mtl', -0.88,0.96,5.554, 0.1,0.08,0.08,	0,0,0, "cooked steak")
 						cooked_steak = pan_item
 						pan_item_name = pan_item.name
+
+						frySound.pause()
+						if (finishSound.isPlaying()==false){
+							finishSound.play()
+						}	
+						kick
 						msg= "Your steak is ready!"
 					}
-				}, 3000)
+				}, 2000)
 			}
 		}
 		// selected cooked steak
 		else if(pan_item_name == "cooked steak"){
+
+			if (selectedSound.isPlaying()==false){
+				selectedSound.play()
+			}
+
 			selected_items = cooked_steak
 			selected_items_name = "cooked steak"
 			// go to plate
@@ -1159,17 +1328,33 @@ function panFunction(){
 			world.add(pan_item)
 
 			msg= "Now Cooking...\n Please do not remove/click asparagus"
+			if (frySound.isPlaying()==false){
+				frySound.play()
+			}	
 
 			setTimeout(() => {
+
 				// sound effect for asparagus finished cooked
+
 				pan_item.hide()
 				pan_item = new Objects('aspara_obj', 'aspara_mtl', -0.9,0.968,5.497, 0.06,0.06,0.06,	0,-60,0, "cooked asparagus")
 				cooked_asparagus = pan_item
 				pan_item_name = pan_item.name
+
+				frySound.pause()
+				if (finishSound.isPlaying()==false){
+					finishSound.play()
+				}	
+
 				msg= "Your asparagus is ready!"
-			}, 3000)
+			}, 2000)
 		}
 		else if(pan_item_name == "cooked asparagus"){
+
+			if (selectedSound.isPlaying()==false){
+				selectedSound.play()
+			}
+
 			selected_items = cooked_asparagus
 			selected_items_name = "cooked asparagus"
 		}
@@ -1186,6 +1371,10 @@ function serveOrder(){
 	// clear plate
 	plateIngredientRemoval()
 
+	if (serveSound.isPlaying()==false){
+		serveSound.play()
+	}
+
 	// score calculation
 	score += remaining_time * 3
 	score_holder.tag.setAttribute('text','value: Score: ' +score+  '\n Remaining Time: '+remaining_time+' ; color: rgb(0,0,0); align: center;');
@@ -1199,6 +1388,10 @@ function assemblePlate(){
 	if(check_recipe()){
 		// remove all in plate
 		// plateIngredientRemoval()
+
+		if (assembleSound.isPlaying()==false){
+			assembleSound.play()
+		}
 
 		if(current_order == "Sandwich"){
 
@@ -1239,12 +1432,18 @@ function assemblePlate(){
 			msg = "Your noodle is ready! "
 		}
 
+
 		iscorrect_food = true
 
 
 		// PROCEED TO SERVE FUNCTION
 	}
 	else{
+
+		if (errorSound.isPlaying()==false){
+			errorSound.play()
+		}
+
 		// display message
 		iscorrect_food = false
 		msg = "Incorrect Ingredients \n or \n Missing Ingredients"
@@ -1253,7 +1452,7 @@ function assemblePlate(){
 }
 
 function clearPlate(){
-	console.log("clear playe")
+
 	if(food_in_plate_name.length != 0){
 		// remove everything in the plate
 		plateIngredientRemoval()
@@ -1261,6 +1460,7 @@ function clearPlate(){
 		msg = "Message Board"
 	}
 	else{
+
 		msg = "You have nothing \n\n in your plate"
 	}
 }
@@ -1283,6 +1483,10 @@ function clearCuttingBoard(){
 		// message board msg
 		msg = "You removed \n" + board_item_name
 
+		if (clearSound.isPlaying()==false){
+			clearSound.play()
+		}
+
 		// clear cutting board variables
 		board_item_name = undefined
 		board_item = undefined
@@ -1292,6 +1496,10 @@ function clearCuttingBoard(){
 		selected_items = undefined
 
 	}else{
+		if (errorSound.isPlaying()==false){
+			errorSound.play()
+		}
+
 		msg = "There is nothing \n on cutting board"
 	}
 }
@@ -1323,11 +1531,10 @@ function clearPot(){
 			}
 		}
 		
-		// clear variables
-		// pot_item_name = undefined
-		// pot_item = undefined
-		// noodle_cooked = false
-		// noodle_ready_to_cook = false
+		if (clearSound.isPlaying()==false){
+			clearSound.play()
+		}
+
 		pot_has = []
 
 		world.remove(cooked_egg)
@@ -1343,8 +1550,13 @@ function clearPot(){
 		noodle_ready_to_cook = false
 		pot_has = []
 
+		if (errorSound.isPlaying()==false){
+			errorSound.play()
+		}
+
+		msg ="There is nothing in the \n\n cooking pot"
+
 	}
-	console.log(pot_has)
 }
 
 function clearPan(){
@@ -1358,6 +1570,10 @@ function clearPan(){
 		pan_item = undefined
 		pan_item_name = undefined
 
+		if (clearSound.isPlaying()==false){
+			clearSound.play()
+		}
+
 		msg = "Your pan is now empty"
 	}
 	else if(pan_item_name == "cooked steak"){
@@ -1366,6 +1582,10 @@ function clearPan(){
 		// clear pan_items
 		pan_item = undefined
 		pan_item_name = undefined
+
+		if (clearSound.isPlaying()==false){
+			clearSound.play()
+		}
 
 		msg = "Your pan is now empty"
 	}
@@ -1376,9 +1596,16 @@ function clearPan(){
 		pan_item = undefined
 		pan_item_name = undefined
 
+		if (clearSound.isPlaying()==false){
+			clearSound.play()
+		}
+
 		msg = "Your pan is now empty"
 	}
 	else{
+		if (errorSound.isPlaying()==false){
+			errorSound.play()
+		}
 		msg = "You have nothing in your pan"
 
 	}
@@ -1440,6 +1667,7 @@ function knifeMovement(){
 function cookNoodle(){
 	// sound effect for boiling noodle	
 	msg= "Please wait ... \n\n Now Cooking Noodle"
+	
 
 	// add water
 	water = new Circle({
@@ -1454,6 +1682,7 @@ function cookNoodle(){
 
 	// water filling animation in draw()
 	// add water sound
+	
 
 	if(!water_filled){
 		start_water = true
@@ -1461,11 +1690,15 @@ function cookNoodle(){
 
 	setTimeout(() => {
 		if(water_filled){
-			console.log("water filled, start boiling")
+			waterSound.pause()
+
 			// add water to container
 			water.setY(1)
 		}
 
+		if (finishSound.isPlaying()==false){
+			finishSound.play()
+		}
 		// start boiling
 		// start_bubble = true
 
@@ -1566,6 +1799,10 @@ class Fridge {
 			scaleX: this.hitboxsize, scaleY:this.hitboxsize+0.2, scaleZ:this.hitboxsize,
 			rotationX:0,opacity:0.5,
 			clickFunction: function(me){
+				if (fridge_open.isPlaying()==false){
+					fridge_open.play()
+				}
+
 				fridge.Open_Door()
 				msg = "Fridge Opened"
 
@@ -1579,6 +1816,9 @@ class Fridge {
 			rotationX:0,
 			rotationY:220,opacity:0.5,
 			clickFunction: function(me){
+				if (fridge_close.isPlaying()==false){
+					fridge_close.play()
+				}
 				fridge.Close_Door()
 				msg = "Fridge Closed"
 
@@ -1685,6 +1925,7 @@ class Interactables {
 					rotationZ:_rotationZ
 				})
 
+
 				// generic message for all items if nothing unordinary
 				msg = "Message Board"
 
@@ -1700,6 +1941,10 @@ class Interactables {
 
 				else{
 					knife_clicked = false
+
+					if (selectedSound.isPlaying()==false){
+						selectedSound.play()
+					}
 
 					if(selected_items_name == "bread"){
 						bread_clicked = true
@@ -1799,7 +2044,11 @@ class Customer{
 			clickFunction: function(me){
 				//check food
 				if(iscorrect_food){
-					console.log("next cus")
+
+					if (eating.isPlaying()==false){
+						eating.play()
+					}
+
 					current_customer.remove_from_world()
 					let prev_customer = current_customer
 					while(prev_customer == current_customer){
@@ -1818,6 +2067,9 @@ class Customer{
 
 				}
 				else{
+					if (errorSound.isPlaying()==false){
+						errorSound.play()
+					}
 					msg = "The order is not ready or wrong \n If this is noodle \n Click assemble order"
 				}
 			}
@@ -1839,6 +2091,10 @@ class Customer{
 			clickFunction: function(me){
 				msg = "Oh no! \n You just kicked out \n a dear customer"
 				set_random_customer_order()
+
+				if (kickOutSound.isPlaying()==false){
+					kickOutSound.play()
+				}
 
 				// console.log("Kicked out the customer");
 				remaining_time = int(random(60,120))
@@ -1872,6 +2128,10 @@ class Customer{
 	//constructor ends
 
 	add_to_world(){
+		if (new_customer_sound.isPlaying()==false){
+			new_customer_sound.play()
+		}
+
 		this.container.setY(0)
 	}
 
