@@ -1,7 +1,7 @@
 // **** PROBLEMS THAT STILL NEEDS SOLVING ****：
 // - needs to fix --> Clicking on the item on cutting board or pan twice will NOT make the item disappear
 // --> timer needs to display lengthened time for ALL orders; currntly lengthened time only applies to the first order; 
-// 
+// ---------------------------------------------------------------------------------------------------------------------------------
 // ---------------------------------------------------------------------------------------------------------------------------------
 
 
@@ -22,7 +22,7 @@ var holdingitem_show_box_img
 
 //************* UI
 var selected_items,selected_items_name 					// user's current selection
-var clearSelectionBtn, selectionUI	// clear selection and show current selection
+var clearSelectionBtn, selectionUI						// clear selection and show current selection
 
 var messageBoard
 var msg = "Please Check Recipe for Order"
