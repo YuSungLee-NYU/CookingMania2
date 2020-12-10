@@ -1,6 +1,6 @@
 // **** PROBLEMS THAT STILL NEEDS SOLVING ****：
 // - needs to fix --> Clicking on the item on cutting board or pan twice will NOT make the item disappear
-// --> timer needs to display lengthened time for ALL orders; currntly lengthened time only applies to the first order; 
+// --> timer needs to display lengthened time for ALL orders; currntly lengthened time only applies to the first order;
 // ---------------------------------------------------------------------------------------------------------------------------------
 // ---------------------------------------------------------------------------------------------------------------------------------
 // last step: clean up code
@@ -165,8 +165,8 @@ function setup() {
 
 			if (openRecipeSound.isPlaying()==false){
 				openRecipeSound.play()
-			}			
-			
+			}
+
 			recipe_textholder.show()
 			recipe_close_button.show()
 			recipe_container.setY(0)
@@ -418,7 +418,7 @@ function setup() {
 		})
 		world.add(stove)
 
-		
+
 		pot = new Interactables('pot_obj','pot_mtl',	-0.95,0.94,5.04,	0.008,0.01,0.008,	0,300,0,	-0.887,1.05, 4.975,	0.45,0.23,0.38,	"pot")
 		pan = new Interactables('pan_obj','pan_mtl',	-0.66,1,5.49,		1,1,1,				0,270,0,	-0.828,0.957,5.55, .61,0.2,.33,		"pan")
 
@@ -460,7 +460,7 @@ function setup() {
 			x:0, y:1.04, z:4.27,
 			width:0.98, height:0.4, depth:0.32,
 			scaleX:0.5,scaleY:0.5,scaleY:0.5,
-			opacity: 0.6,
+			opacity: 0,
 			// transparent:true,
 			clickFunction: function(theBox){
 				// items for cutting boards ONLY: LETTUCE, TOMATO, CHEESE
@@ -495,7 +495,7 @@ function setup() {
 						}
 					}else{
 						// iniate the animation of cutting
-						
+
 						// tomato - show tomato slice
 						if(board_item_name == "tomato"){
 							if (cutSound.isPlaying()==false){
@@ -510,7 +510,7 @@ function setup() {
 							board_item_name = board_item.name
 							board_item.show()
 
-						
+
 						}
 						// cheese - show cheese slice
 						else if(board_item_name == "cheese"){
@@ -532,7 +532,7 @@ function setup() {
 						else if(board_item_name == "lettuce"){
 							if (cutCheeseSound.isPlaying()==false){
 								cutCheeseSound.play()
-							}	
+							}
 
 							board_item.hide()
 							board_item = new Objects('lettuceShreds_obj', 'lettuceShreds_mtl', 0,1.05,4.28, 0.07,0.07,0.07,	0,0,0, "lettuce shreds")
@@ -540,7 +540,7 @@ function setup() {
 							board_item_name = "lettuce shreds"
 							board_item.show()
 
-											
+
 						}
 						else{
 							msg = "There is nothing \n there to cut"
@@ -621,7 +621,7 @@ function setup() {
 				if (selectedSound.isPlaying()==false){
 					selectedSound.play()
 				}
-				
+
 				selected_items_name = "cheese"
 
 				// Go to Cutting board now
@@ -633,16 +633,16 @@ function setup() {
 		steak = new Interactables('steak_raw_obj','steak_raw_mtl',	0,1.187,5.95,	0.5,0.5,0.5,	-0,0,0,  0,1.197,5.97,	0.2,0.05,0.29,	"steak")
 		asparagus = new Interactables('aspara_obj','aspara_mtl',	-0.2,1.387,5.97,	0.07,0.07,0.07,	-0,-60,0, -0.2,1.387,5.97,	0.2,0.05,0.29,	"asparagus")
 
-		// noodle 
+		// noodle
 		egg = new Interactables('egg_obj', 'egg_mtl', 	0.037,0.991,5.87, 	0.001,0.001,0.001, 	-80,30,0,		0.037,1.03,5.87,	0.17,0.09,0.2, 	"egg")
 		bowl = new Objects('basket_obj','basket_mtl',	-0.172,1.042,5.899,		0.380,0.380,0.380,	0,0,0, "bowl")
-		
+
 		noodle = new Container3D({
 			x:-0.21, y:1.03, z:5.9,
 			rotationX:90, rotationZ:20,
 		})
 		world.add(noodle)
-		
+
 		for (var i =0;i<4;i++){
 			var pasta = new TorusKnot({
 				x:0.03*i, y:0.001*i, z:0,
@@ -651,11 +651,11 @@ function setup() {
 				scaleX:0.02, scaleY:0.02, scaleZ: 0.02,
 				rotationX:0.1+0.05*i, rotationY:0.1 +0.05*i, rotationZ:0.1+0.05*i,
 				clickFunction: function(theBox) {
-		
+
 					// disable previous other varibales to prevent conflict
 					bread_clicked = false
 
-					// update selected item 
+					// update selected item
 					selected_items_name = "noodle"
 					// and directly update pot_item_name
 					pot_item_name = "noodle"
@@ -670,7 +670,7 @@ function setup() {
 
 		// bubbles= new Bubbles(-0.95,0.94,5.04)
 		// bubble.push(bubbles,bubbles,bubbles,bubbles,bubbles)
-	
+
 
 
 
@@ -1066,7 +1066,7 @@ function plateFunction(){
 
 					world.add(cooked_steak)
 					world.remove(pan_item)
-					
+
 					// clearPan()
 					msg = "Message Board"
 
@@ -1118,7 +1118,7 @@ function plateFunction(){
 
 					// noodle_soup
 					noodle_soup = new Objects('noodleSoup_obj','noodleSoup_mtl',	0.84,0.96,5.12,	0.03,0.03,0.03,	0,0,0,"noodle soup")
-					
+
 					if (placeFoodSound.isPlaying()==false){
 						placeFoodSound.play()
 					}
@@ -1160,7 +1160,7 @@ function potFunction(){
 	// check if user has selected item appropriate to pan
 		if (pot_item_name == "noodle" || pot_item_name == "egg"){
 
-			// check if there is anything in pot 
+			// check if there is anything in pot
 			if(!checkPotItems(pot_item_name)){
 
 				// container for noodle
@@ -1181,7 +1181,7 @@ function potFunction(){
 
 					if (egg_cracking.isPlaying()==false){
 						egg_cracking.play()
-					}	
+					}
 				}
 
 				// for noodle
@@ -1191,7 +1191,7 @@ function potFunction(){
 
 					noodle_copy = new Container3D({
 
-					}) 
+					})
 
 					// create a copy of torus noodle and add to container
 					for (var i =0;i<4;i++){
@@ -1208,7 +1208,7 @@ function potFunction(){
 					noodle_container.addChild(noodle_copy)
 					if (placeFoodSound.isPlaying()==false){
 						placeFoodSound.play()
-					}	
+					}
 				}
 
 				world.add(noodle_container)
@@ -1240,7 +1240,7 @@ function potFunction(){
 
 			msg="Cooking pot is only \n\n for noodles and eggs"
 		}
-		
+
 		if(pot_has.length == 2){
 			// error sound
 			if (errorSound.isPlaying()==false){
@@ -1279,22 +1279,22 @@ function panFunction(){
 
 		// put steak / asparagus on pan
 		if(pan_item_name == "steak"){
-	
+
 			pan_item.setPosition(-0.869,0.969,5.549)
 			world.add(pan_item)
 
 			// sound effect for steak being cooked
 			msg= "Now Cooking...\n Please do not remove/click steak"
-			
+
 			if (frySound.isPlaying()==false){
 				frySound.play()
-			}	
+			}
 
 			if(pan_item_name != undefined){
 				setTimeout(() => {
 					// sound effect for steak finished cooked
 					if(pan_item_name != undefined){
-				
+
 						pan_item.hide()
 						pan_item = new Objects('steak_obj', 'steak_mtl', -0.88,0.96,5.554, 0.1,0.08,0.08,	0,0,0, "cooked steak")
 						cooked_steak = pan_item
@@ -1303,7 +1303,7 @@ function panFunction(){
 						frySound.pause()
 						if (finishSound.isPlaying()==false){
 							finishSound.play()
-						}	
+						}
 						kick
 						msg= "Your steak is ready!"
 					}
@@ -1330,7 +1330,7 @@ function panFunction(){
 			msg= "Now Cooking...\n Please do not remove/click asparagus"
 			if (frySound.isPlaying()==false){
 				frySound.play()
-			}	
+			}
 
 			setTimeout(() => {
 
@@ -1344,7 +1344,7 @@ function panFunction(){
 				frySound.pause()
 				if (finishSound.isPlaying()==false){
 					finishSound.play()
-				}	
+				}
 
 				msg= "Your asparagus is ready!"
 			}, 2000)
@@ -1398,7 +1398,7 @@ function assemblePlate(){
 
 			// transform to final product and add to plate array
 			sandwich = new Objects('sandwich_obj','sandwich_mtl',	0.81,1,5.12,	0.99,0.63,0.72,	0,90,-90,"sandwich")
-			
+
 			plateIngredientRemoval()
 
 			food_in_plate.push(sandwich)
@@ -1530,7 +1530,7 @@ function clearPot(){
 				noodle_container.removeChild(water)
 			}
 		}
-		
+
 		if (clearSound.isPlaying()==false){
 			clearSound.play()
 		}
@@ -1578,7 +1578,7 @@ function clearPan(){
 	}
 	else if(pan_item_name == "cooked steak"){
 		world.remove(cooked_steak.utensil)
-		
+
 		// clear pan_items
 		pan_item = undefined
 		pan_item_name = undefined
@@ -1591,7 +1591,7 @@ function clearPan(){
 	}
 	else if(pan_item_name == "cooked asparagus"){
 		world.remove(cooked_asparagus.utensil)
-		
+
 		// clear pan_items
 		pan_item = undefined
 		pan_item_name = undefined
@@ -1609,7 +1609,7 @@ function clearPan(){
 		msg = "You have nothing in your pan"
 
 	}
-	
+
 
 
 }
@@ -1665,9 +1665,9 @@ function knifeMovement(){
 }
 
 function cookNoodle(){
-	// sound effect for boiling noodle	
+	// sound effect for boiling noodle
 	msg= "Please wait ... \n\n Now Cooking Noodle"
-	
+
 
 	// add water
 	water = new Circle({
@@ -1682,7 +1682,7 @@ function cookNoodle(){
 
 	// water filling animation in draw()
 	// add water sound
-	
+
 
 	if(!water_filled){
 		start_water = true
@@ -1704,7 +1704,7 @@ function cookNoodle(){
 
 		// setTimeout(() => {
 		// 	start_bubble = false
-		// finished boiling! 
+		// finished boiling!
 			noodle_cooked = true
 			msg ="The Noodle is Ready"
 			// user will now click the pot again
@@ -1909,7 +1909,7 @@ class Interactables {
 			scaleY: hitBozScaleY,
 			scaleZ: hitBozScaleZ,
 
-			opacity: 0.6,
+			opacity: 0,
 
 
 			clickFunction: function(theBox){
@@ -2096,16 +2096,15 @@ class Customer{
 					kickOutSound.play()
 				}
 
-				// console.log("Kicked out the customer");
+				console.log("Kicked out the customer");
 				remaining_time = int(random(60,120))
 
 				score -= 1
 				score_holder.tag.setAttribute('text','value: Score: ' +score+  '\n Remaining Time: '+remaining_time+' ; color: rgb(0,0,0); align: center;');
 				food_in_plate = []
-				for(let i = 0; i < cutting_board_item.length; i++){
-					world.remove( cutting_board_item[i])
-				}
 
+				
+				console.log("?");
 				current_customer.remove_from_world()
 				let prev_customer = current_customer
 				while(prev_customer == current_customer){
@@ -2138,7 +2137,7 @@ class Customer{
 	remove_from_world(){
 		// set customer  clicked to false
 		// customer_clicked = false
-		this.container.setY(-10)
+		this.container.setY(-100)
 	}
 
 }
