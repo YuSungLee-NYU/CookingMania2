@@ -3,7 +3,7 @@
 // --> timer needs to display lengthened time for ALL orders; currntly lengthened time only applies to the first order; 
 // ---------------------------------------------------------------------------------------------------------------------------------
 // ---------------------------------------------------------------------------------------------------------------------------------
-
+// last step: clean up code
 
 var world
 var camX = 0
