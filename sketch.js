@@ -1,10 +1,3 @@
-// **** PROBLEMS THAT STILL NEEDS SOLVING ****：
-// - needs to fix --> Clicking on the item on cutting board or pan twice will NOT make the item disappear
-// --> timer needs to display lengthened time for ALL orders; currntly lengthened time only applies to the first order;
-// ---------------------------------------------------------------------------------------------------------------------------------
-// ---------------------------------------------------------------------------------------------------------------------------------
-// last step: clean up code
-
 var world
 var camX = 0
 var camY = 1.8
