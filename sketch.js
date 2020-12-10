@@ -719,7 +719,7 @@ function draw() {
 			set_random_customer_order()
 
 			current_customer.add_to_world()
-			remaining_time = int(random(15,30))
+			remaining_time = int(random(60,120))
 			score -= 1
 			score_holder.tag.setAttribute('text','value: Score: ' +score+  '\n Remaining Time: '+remaining_time+' ; color: rgb(0,0,0); align: center;');
 		}
@@ -2103,7 +2103,7 @@ class Customer{
 				score_holder.tag.setAttribute('text','value: Score: ' +score+  '\n Remaining Time: '+remaining_time+' ; color: rgb(0,0,0); align: center;');
 				food_in_plate = []
 
-				
+
 				console.log("?");
 				current_customer.remove_from_world()
 				let prev_customer = current_customer
