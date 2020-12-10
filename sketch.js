@@ -25,7 +25,7 @@ var selected_items,selected_items_name 					// user's current selection
 var clearSelectionBtn, selectionUI	// clear selection and show current selection
 
 var messageBoard
-var msg = "Message Board"
+var msg = "Please Check Recipe for Order"
 
 // Plate UI:
 var assembleBtn, clearPlateBtn		// button that clears plate nad assemble ingredient into final dish
@@ -53,22 +53,11 @@ var noodle, cooked_noodle, egg, cooked_egg, noodle_container, water
 var noodle_ready_to_cook = false, noodle_cooked = false
 var start_water = false, water_filled = false
 var water_y = 0.94
+
 var start_bubble = false
 var bubbles, bubble = []
 
-// var noodle_clicked = false
-// var pot_clicked = false
-// var boiled = false
-// var noodle_in_pot = false
-// var water_filled = false
 var pasta1, pasta2, soup, egg1
-// var bubble=[]
-// var egg_clicked = false
-// var egg_in_pot = false
-// var noodle_prepared
-// var noodle_finished = false
-// var bubbled = false
-// var plate_clicked = false
 
 
 
@@ -97,12 +86,13 @@ var selected_items, selected_items_name		// item at current selection
 
 // variable for specific tools/item/ingredient
 var knife_clicked = false
+// var cutting = false
 var bread_clicked = false
 
 
 // order check
 var current_order							// current order name
-var customer_order_list = ["Noodle Soup"]	// list of orders possible
+var customer_order_list = ["Noodle Soup","Sandwich", "Steak"]	// list of orders possible
 var current_order_requirements = []			// list of ingrediants needed from current order
 var food_in_plate = []						// ingrediants currently in plate
 var food_in_plate_name = []					// name of ingre currently in plate
@@ -189,21 +179,15 @@ function setup() {
 
 
 	// ****************************** UI ******************************
-		// Hold Item Show box
-		holdingitem_show_box = new Plane({
-			x:0,y:0.5,z:0,
-			width:0.2,
-			height:0.2
-		})
 		remaining_time = int(random(60,120))
 
 		score_holder = new Plane({
-			x:0,y:0.7,z:0,
+			x: 0, y:0.56, z:-0.8,
 			red:186,green:255,blue:201,
-			width:0.5,
-			height:0.2
+			width:0.4,
+			height:0.155
 		})
-		score_holder.tag.setAttribute('text','value: Score: ' +score+  '\n Remaining Time: '+remaining_time+' ; color: rgb(0,0,0); align: center; width:1; height:1;');
+		score_holder.tag.setAttribute('text','value: Score: ' +score+  '\n Remaining Time: '+remaining_time+' ; color: rgb(0,0,0); align: center; width:0.7; height:0.7;');
 		// **suggestion: add a # of orders completed successfully
 
 		// clear selection button
@@ -243,23 +227,20 @@ function setup() {
 			red:185,green:190,blue:195, opacity: 0.8,
 			width:0.5, height:0.155
 		})
-		messageBoard.tag.setAttribute('text','value: '+ msg +'; color: rgb(0,0,0); align:center; height: 1; width:1;')
+		// messageBoard.tag.setAttribute('text','value: Please; color: rgb(0,0,0); align:center; height: 1; width:1;')
 
 		// add Btns to the HUD
-		world.camera.cursor.addChild(score_holder);
+		world.camera.holder.appendChild(score_holder.tag);
 		world.camera.holder.appendChild(selectionUI.tag);
 		world.camera.holder.appendChild(clearSelectionBtn.tag);
 		world.camera.holder.appendChild(messageBoard.tag);
 
 
-	//show the HUD
-	world.camera.cursor.show();
-
 	// Ajust Camera
 	world.setUserPosition(camX,camY,camZ)
 
 	// disable WASD control
-	//world.camera.holder.removeAttribute('wasd-controls')
+	world.camera.holder.removeAttribute('wasd-controls')
 
 
 
@@ -424,7 +405,7 @@ function setup() {
 
 		cuttingBoardBox = new Box({
 			x:0, y:1.04, z:4.27,
-			width:0.54, height:0.4, depth:0.21,
+			width:0.98, height:0.4, depth:0.32,
 			scaleX:0.5,scaleY:0.5,scaleY:0.5,
 			opacity: 0.6,
 			// transparent:true,
@@ -459,8 +440,7 @@ function setup() {
 						}
 					}else{
 						// iniate the animation of cutting
-
-
+						
 						// tomato - show tomato slice
 						if(board_item_name == "tomato"){
                             // hide state before cutting
@@ -611,8 +591,8 @@ function setup() {
 			noodle.add(pasta)
 		}
 
-		bubbles= new Bubbles(-0.95,0.94,5.04)
-		bubble.push(bubbles,bubbles,bubbles,bubbles,bubbles)
+		// bubbles= new Bubbles(-0.95,0.94,5.04)
+		// bubble.push(bubbles,bubbles,bubbles,bubbles,bubbles)
 	
 
 
@@ -668,11 +648,12 @@ function draw() {
 		}
 	}
 
-	// move the holding item correspondingly following the mouse
+	// Knife
 	if(knife_clicked){
 		holdingitem.setX(map(mouseX,0,windowWidth,-1,1) + 0.11)
 		holdingitem.setY(map(mouseY,0,windowHeight,-0.5,0.5) * -1)
 	}
+
 
 	// Bubble Effects:
 	// if (start_bubble){
@@ -684,7 +665,6 @@ function draw() {
 
 	// check if noodle is ready
 	if(noodle_ready_to_cook){
-		console.log("yes ready!!")
 		cookNoodle()
 		noodle_ready_to_cook = false
 	}
@@ -745,7 +725,7 @@ function set_random_customer_order(){
 	}
 	// ** Suggestion: change or remove noodle to sth else, maybe a drink??
 	else if(current_order == "Noodle Soup"){
-		recipe_detail = "Noodles Instruction Here"
+		recipe_detail = "Current Order: Noodle Soup \n\n 1. Take out noodle and egg from fridge \n\n 2. put them in cooking pot \n\n 3. It will automatically start adding the water \n\n 4. Please do not click the pot while cooking \n\n 5. When finished, select the cooked noodle \n\n 6. Click on plate \n\n 7. Assemble the order \n\n 8. Serve the order "
 	}
 	else if(current_order == "Sandwich"){
 		// recipe_detail = "The Customer wants a Sandwich \n\n Get the bread on the cutting board \n Get the tomato on the cuttin board \n Get the cheese on the cutting board \n Get the bread on the cutting board"
@@ -760,6 +740,8 @@ function set_random_customer_order(){
 function check_recipe(){
 	console.log("check recipe")
 	console.log(food_in_plate_name)
+	console.log(current_order_requirements)
+
 
 	// if no food in plate
 	if(food_in_plate_name.length == 0){
@@ -788,6 +770,7 @@ function check_recipe(){
 
 // this function checks if given ingredient is already in plate
 function checkPlateItems(ingredient){
+	console.log(food_in_plate_name)
 	// there is nothing in plate
 	if(food_in_plate_name.length == 0){
 		return false
@@ -830,7 +813,8 @@ function checkPotItems(ingredient){
 
 function plateFunction(){
 	// selected_items_name in this function is ALWAYS = PLATE
-	// console.log(pot_item_name)
+	console.log(food_in_plate_name)
+	console.log(food_in_plate)
 
 	// if user has selected an item/ aka the plate
 	if(selected_items != undefined){
@@ -958,13 +942,18 @@ function plateFunction(){
 					cooked_steak.utensil.setScale(0.14,0.05,0.12)
 					cooked_steak.utensil.show()
 
+					// clear pan_items
+					pan_item = undefined
+					pan_item_name = undefined
+
 					// add ingredient to the plate array
 					food_in_plate.push(cooked_steak)
 					food_in_plate_name.push("cooked steak")
 
 					world.add(cooked_steak)
+					world.remove(pan_item)
 					
-					clearPan()
+					// clearPan()
 					msg = "Message Board"
 
 
@@ -978,13 +967,19 @@ function plateFunction(){
 					cooked_asparagus.utensil.setScale(0.08,0.08,0.08)
 					cooked_asparagus.utensil.show()
 
+					// clear pan_items
+					pan_item = undefined
+					pan_item_name = undefined
+
 					// add ingredient to the plate array
 					food_in_plate.push(cooked_asparagus)
 					food_in_plate_name.push("cooked asparagus")
 
 					world.add(cooked_asparagus)
+					world.remove(pan_item)
 
-					clearPan()
+
+					// clearPan()
 					msg = "Message Board"
 
 				}
@@ -1207,10 +1202,11 @@ function assemblePlate(){
 
 		if(current_order == "Sandwich"){
 
-			plateIngredientRemoval()
 
 			// transform to final product and add to plate array
 			sandwich = new Objects('sandwich_obj','sandwich_mtl',	0.81,1,5.12,	0.99,0.63,0.72,	0,90,-90,"sandwich")
+			
+			plateIngredientRemoval()
 
 			food_in_plate.push(sandwich)
 			food_in_plate_name.push("sandwich")
@@ -1257,6 +1253,7 @@ function assemblePlate(){
 }
 
 function clearPlate(){
+	console.log("clear playe")
 	if(food_in_plate_name.length != 0){
 		// remove everything in the plate
 		plateIngredientRemoval()
@@ -1352,6 +1349,7 @@ function clearPot(){
 
 function clearPan(){
 	console.log("clear pan function")
+	msg = "Message Board"
 
 	if(pan_item_name == "steak" ||pan_item_name == "asparagus"){
 		world.remove(pan_item)
@@ -1483,6 +1481,7 @@ function cookNoodle(){
 
 
 }
+
 
 // ****************************** CLASSES ******************************
 // ---------------------------------------------------------------------
